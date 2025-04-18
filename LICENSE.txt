@@ -1,0 +1,23 @@
+License: Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
+
+You are free to:
+
+- Use, copy, and distribute this code,
+- Modify and adapt it for your own purposes,
+
+under the following conditions:
+
+1. **Attribution** — You must give appropriate credit to the original author, provide a link to the license, and indicate if changes were made.
+
+2. **NonCommercial** — You may not use the code (original or modified) for commercial purposes without prior written permission from the author.
+
+**Commercial Use:**
+
+Commercial use of this code requires a separate license agreement.  
+
+---
+
+The full license text is available at:  
+https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+© [uhrb], [2025]

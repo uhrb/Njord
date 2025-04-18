@@ -1,0 +1,29 @@
+﻿namespace Njord.AisStream
+{
+    public enum AisStreamMessageType
+    {
+        AddressedBinaryMessage,
+        AddressedSafetyMessage,
+        AidsToNavigationReport,
+        AssignedModeCommand,
+        BaseStationReport,
+        BinaryAcknowledge,
+        ChannelManagement,
+        CoordinatedUTCInquiry,
+        DataLinkManagementMessage,
+        ExtendedClassBPositionReport,
+        GnssBroadcastBinaryMessage,
+        Interrogation,
+        LongRangeAisBroadcastMessage,
+        MultiSlotBinaryMessage,
+        PositionReport,
+        SafetyBroadcastMessage,
+        ShipStaticData,
+        SingleSlotBinaryMessage,
+        StandardClassBPositionReport,
+        StandardSearchAndRescueAircraftReport,
+        GroupAssignmentCommand,
+        StaticDataReport,
+        UnknownMessage
+    }
+}
