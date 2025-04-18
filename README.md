@@ -1,4 +1,4 @@
-1. Obtain AisStream (https://aisstream.io/) token and put it into configuration of Njord.Server
+1. Obtain AisStream (https://aisstream.io/) token and put it into configuration (appsettings.json) of Njord.Server
 2. Run Njord.Server
 3. Run njord.fend
 4. ...
