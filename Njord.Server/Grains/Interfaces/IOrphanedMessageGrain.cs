@@ -4,7 +4,7 @@ using Orleans;
 namespace Njord.Server.Grains.Interfaces
 {
     [Alias("Njord.Server.Grains.IOrphanedMessageCollectorGrain")]
-    public interface IOrphanedMessageSink : IGrainWithStringKey
+    public interface IOrphanedMessageGrain : IGrainWithStringKey
     {
         Task ProcessOrhpanedMessage(string callerGrain, IMessageId messageId);
     }

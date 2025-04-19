@@ -1,24 +1,34 @@
 ﻿using Njord.Ais.Interfaces;
 using Njord.Ais.MessageProcessing;
-using Njord.Server.Grains.Interfaces;
+using Njord.Server.Grains.Instrumentation;
 
 namespace Njord.Server.Intstrumentation
 {
     public class OrleansSink : IMessageSink<IMessageId>
     {
-        private readonly IGrainFactory _factory;
+        private readonly IGrainAccessor _accessor;
+        private readonly ILogger<OrleansSink> _logger;
 
-        public OrleansSink(IGrainFactory factory)
+        public OrleansSink(IGrainAccessor accessor, ILogger<OrleansSink> logger)
         {
-            _factory = factory;
+            _accessor = accessor;
+            _logger = logger;
         }
 
-        public async Task PutAsync(IMessageId message, CancellationToken token)
+        public Task PutAsync(IMessageId message, CancellationToken token)
         {
             var toUser = (IUserId)message;
+            var grain = _accessor.GetGrainFromMMSI(toUser.UserId);
+            if (grain == null)
+            {
+                _logger.LogDebug("No grain mapped for {UserId}", toUser.UserId);
+            }
+            else
+            {
+                _ = Task.Run(() => grain.ProcessMessage(message), token);
+            }
 
-            var grain = _factory.GetGrain<IUnknownMaritimeEntity>(toUser.UserId);
-            _ = Task.Run(() => grain.ProcessMessage(message));
+            return Task.CompletedTask;
         }
     }
 }

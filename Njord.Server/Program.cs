@@ -13,6 +13,7 @@ using OpenTelemetry.Metrics;
 using Orleans.Serialization;
 using Orleans.Runtime.Hosting;
 using Orleans.Providers;
+using Njord.Server.Grains.Instrumentation;
 
 namespace Njord.Server
 {
@@ -33,6 +34,7 @@ namespace Njord.Server
             builder.Services.AddHostedService<MessageProcessingService>();
             builder.Services.AddHostedService<AisStreamRawMessageSourceService>();
             builder.Services.AddTransient<ServerHealthCheck>();
+            builder.Services.AddSingleton<IGrainAccessor, GrainAccessor>();
             builder.Services.AddMemoryCache();
             builder.Services.AddHealthChecks()
                 .AddCheck<ServerHealthCheck>("metrics");

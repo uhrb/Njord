@@ -4,7 +4,7 @@ using Orleans;
 
 namespace Njord.Server.Grains.Instrumentation
 {
-    public class OrphanedMessageSink : Grain, IOrphanedMessageSink
+    public class OrphanedMessageSink : Grain, IOrphanedMessageGrain
     {
         public const string OrphanedMessageSinkGrainKey = nameof(OrphanedMessageSink);
 

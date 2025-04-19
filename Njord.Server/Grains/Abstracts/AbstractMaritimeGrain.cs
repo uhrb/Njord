@@ -3,8 +3,6 @@ using Njord.Ais.Interfaces;
 using Njord.Server.Grains.Instrumentation;
 using Njord.Server.Grains.Interfaces;
 using Njord.Server.Grains.States.Abstracts;
-using Orleans;
-using Orleans.Runtime;
 
 namespace Njord.Server.Grains.Abstracts
 {
@@ -33,7 +31,7 @@ namespace Njord.Server.Grains.Abstracts
                     var typeName = GetType().Name;
                     var enumName = Enum.GetName(message.MessageId);
                     _logger.LogDebug("Possibly missing mapping for Grain {typeName} for message {enumName}", typeName, enumName);
-                    var sink = GrainFactory.GetGrain<IOrphanedMessageSink>(OrphanedMessageSink.OrphanedMessageSinkGrainKey);
+                    var sink = GrainFactory.GetGrain<IOrphanedMessageGrain>(OrphanedMessageSink.OrphanedMessageSinkGrainKey);
                     await sink.ProcessOrhpanedMessage(mmsi, message);
                 }
 
@@ -45,7 +43,7 @@ namespace Njord.Server.Grains.Abstracts
                 _logger.LogWarning("Grains failed to process message: {Message}", ex.Message);
             }
 
-            var failGrain = GrainFactory.GetGrain<IFailedMessageSink>(FailedMessageSink.FailedMessageSinkGrainKey);
+            var failGrain = GrainFactory.GetGrain<IFailedMessageGrain>(FailedMessageSink.FailedMessageSinkGrainKey);
             await failGrain.ProcessFailedMessage(mmsi, message);
         }
 

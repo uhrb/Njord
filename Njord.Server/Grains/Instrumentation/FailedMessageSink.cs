@@ -4,7 +4,7 @@ using Orleans;
 
 namespace Njord.Server.Grains.Instrumentation
 {
-    public class FailedMessageSink : Grain, IFailedMessageSink
+    public class FailedMessageSink : Grain, IFailedMessageGrain
     {
         public const string FailedMessageSinkGrainKey = nameof(FailedMessageSink);
 
