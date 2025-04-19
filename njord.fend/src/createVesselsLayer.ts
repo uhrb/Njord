@@ -20,14 +20,18 @@ export function createVesselsLayer(data: VesselState[], zoom: number) {
         getPosition: (d: VesselState) => [d.longitude ?? 0, d.latitude ?? 0],
         getAngle: (d: VesselState) => {
             let angle = 0;
-            let cog = d.courseOverGround ?? 0;
-            cog = cog == 360 ? 0 : cog;
-            let th = d.trueHeading ?? 0;
-            th = th == 511 ? 0 : th;
-            if (cog != 0) {
-                angle = cog;
-            } else if (th != 0) {
-                angle = th;
+            if (
+                (d.speedOverGround != undefined && d.speedOverGround > 1 && d.speedOverGround != 102.3) // speed is defined and available
+                && (d.courseOverGround != undefined && d.courseOverGround != 360) // course is defined and available
+            ) {
+                // vessel is moving, using cog
+                angle = d.courseOverGround;
+            }
+            else {
+                // vessel is not moving, using true heading
+                if (d.trueHeading != undefined && d.trueHeading != 360) {
+                    angle = d.trueHeading;
+                } 
             }
             return 360 - angle;
         },
@@ -41,7 +45,7 @@ export function createVesselsLayer(data: VesselState[], zoom: number) {
         },
         transitions: {
             getPosition: {
-              duration: 5000, 
+                duration: 5000,
             }
         },
         pickable: true,

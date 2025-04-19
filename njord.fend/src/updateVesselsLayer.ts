@@ -11,6 +11,4 @@ export function updateVesselsLayer(deck: DeckLayer, vessels: Map<string, VesselS
             createVesselsLayer(newData, zoom),
         ]
     });
-
-    console.log("Vessels layer updated", newData.length, "vessels");
 }

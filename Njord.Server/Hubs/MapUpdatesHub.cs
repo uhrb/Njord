@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Njord.Ais.Enums;
 using Njord.Ais.Extensions.Interfaces;
 using Njord.Server.Intstrumentation;
+using System.Text.RegularExpressions;
 
 namespace Njord.Server.Hubs
 {
@@ -33,6 +35,40 @@ namespace Njord.Server.Hubs
                     await Clients.Caller.SendAsync("Update", state.GrainType, state.GrainId, state.GrainState);
                 }
             }
+        }
+
+        public Dictionary<int, string?> CommandGetShipTypeMappings()
+        {
+            return GetEnumNamesMappings<TypeOfShipAndCargoType>(_ => (int)_);
+        }
+
+        public Dictionary<int, string?> CommandGetNavigationStatusMappings()
+        {
+            return GetEnumNamesMappings<NavigationalStatus>(_ => (int)_);
+        }
+
+        private Dictionary<int, string?> GetEnumNamesMappings<T>(Func<T, int> conv) where T : struct, Enum
+        {
+            var values = Enum.GetValues<T>();
+            var mappings = new Dictionary<int, string?>();
+            foreach (var value in values)
+            {
+                var name = Enum.GetName(value);
+                mappings.Add(conv(value), SplitTitleCase(name));
+            }
+
+            return mappings;
+        }
+
+        public static string? SplitTitleCase(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return input;
+            }
+
+            var result = Regex.Replace(input, @"(?<=[a-z])([A-Z0-9])", " $1");
+            return result;
         }
 
         public override Task OnDisconnectedAsync(Exception? exception)

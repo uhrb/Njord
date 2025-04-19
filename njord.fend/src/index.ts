@@ -6,8 +6,13 @@ import { VesselState } from './VesselState';
 import { createVesselsLayer } from './createVesselsLayer';
 import { updateVesselsLayer } from './updateVesselsLayer';
 import 'leaflet/dist/leaflet.css';
+import { getDegreeString } from './getDegreeString';
+import getMappedName from './getMappedName';
 
 const vessels: Map<string, VesselState> = new Map<string, VesselState>();
+
+let shipTypeNameMappings: Record<number, string | undefined> = {};
+let navigationStatusMappings: Record<number, string | undefined> = {};
 
 const map = L.map(document.getElementById('map')!, {
     center: [51.47, 0.45],
@@ -54,10 +59,11 @@ const deckLayer = new DeckLayer({
                 `<tr><td>MMSI</td><td>${object.mmsi}</td></tr>` +
                 `<tr><td>Name</td><td>${object.name}</td></tr>` +
                 `<tr><td>Call Sign</td><td>${object.callSign}</td></tr>` +
-                `<tr><td>Type</td><td>${object.typeOfShipAndCargoType}</td></tr>` +
-                `<tr><td>Nav status</td><td>${object.navigationalStatus}</td></tr>` +
-                `<tr><td>COG</td><td>${object.courseOverGround}</td></tr>` +
-                `<tr><td>True Heading</td><td>${object.trueHeading}</td></tr>` +
+                `<tr><td>Type</td><td>${getMappedName(object.typeOfShipAndCargoType, shipTypeNameMappings)}</td></tr>` +
+                `<tr><td>Nav status</td><td>${getMappedName(object.navigationalStatus, navigationStatusMappings)}</td></tr>` +
+                `<tr><td>COG</td><td>${getDegreeString(object.courseOverGround, 360)}</td></tr>` +
+                `<tr><td>SOG</td><td>${object.speedOverGround?.toFixed(2)} kn</td></tr>` +
+                `<tr><td>True Heading</td><td>${getDegreeString(object.trueHeading, 511)}</td></tr>` +
                 `<tr><td>Updated</td><td>${new Date(Date.parse(object.updated!)).toLocaleTimeString()}</td></tr>` +
                 '</table>'
         }
@@ -69,6 +75,7 @@ const deckLayer = new DeckLayer({
 
 
 map.addLayer(deckLayer);
+
 
 map.on('zoom', () => {
     updateVesselsLayer(deckLayer, vessels, map.getZoom());
@@ -101,6 +108,12 @@ connection.on("Update", (objectType, objectId, objectState) => {
 });
 
 connection.start().then(() => {
+    connection.invoke("CommandGetShipTypeMappings").then((result: Record<number, string| undefined>) => {
+        shipTypeNameMappings = result;
+    });
+    connection.invoke("CommandGetNavigationStatusMappings").then((result: Record<number, string| undefined>) => {
+        navigationStatusMappings = result;
+    });
     connection.invoke("CommandSendAllStatesByType", "Vessel");
 });
 
