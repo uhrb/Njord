@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Njord.OpenTelemetry", "Njor
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "njord.fend", "njord.fend\njord.fend.esproj", "{0167E0DF-7216-2E6A-5A4A-5E5732EAF549}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Njord.NCA", "Njord.NCA\Njord.NCA.csproj", "{2E8F9936-A0FA-4CEF-8B58-6154F0D9DDD7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,6 +90,10 @@ Global
 		{0167E0DF-7216-2E6A-5A4A-5E5732EAF549}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0167E0DF-7216-2E6A-5A4A-5E5732EAF549}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0167E0DF-7216-2E6A-5A4A-5E5732EAF549}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{2E8F9936-A0FA-4CEF-8B58-6154F0D9DDD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E8F9936-A0FA-4CEF-8B58-6154F0D9DDD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E8F9936-A0FA-4CEF-8B58-6154F0D9DDD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E8F9936-A0FA-4CEF-8B58-6154F0D9DDD7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
