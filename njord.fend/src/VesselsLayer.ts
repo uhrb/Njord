@@ -4,6 +4,15 @@ import { VesselState } from "./VesselState";
 import { IconLayer } from "@deck.gl/layers";
 import { FormatterHelper } from "./FormatterHelper";
 import { LatLngBounds } from "leaflet";
+import { UnpackedIcon } from "@deck.gl/layers/dist/icon-layer/icon-manager";
+
+type ExtendedVesselState = VesselState & {
+    size: number;
+    angle: number;
+    zoom: number;
+    color: [number, number, number, number];
+    icon: UnpackedIcon;
+}
 
 export class VesselsLayer extends DeckLayer {
     constructor(shipTypeNameMappings: Record<number, string | undefined>, navigationStatusMappings: Record<number, string | undefined>) {
@@ -13,7 +22,7 @@ export class VesselsLayer extends DeckLayer {
                     repeat: true,
                 }),
             ],
-            getTooltip: ({ object }: PickingInfo<VesselState>) => {
+            getTooltip: ({ object }: PickingInfo<ExtendedVesselState>) => {
                 if (!object) {
                     return null;
                 }
@@ -42,13 +51,24 @@ export class VesselsLayer extends DeckLayer {
         return this;
     }
 
-    private _data: VesselState[] = [];
+    private _data: ExtendedVesselState[] = [];
 
 
-    public onVesselClicked?: ((pickingInfo: PickingInfo, event: any) => boolean | void) | null
+    public onVesselClicked?: ((pickingInfo: PickingInfo<VesselState>, event: any) => boolean | void) | null
 
     public updateLayerData(vessels: VesselState[]) {
-        this._data = vessels;
+        this._data = [];
+        const currentZoom = this._map.getZoom();
+        vessels.forEach((vessel) => {
+            this._data.push({
+                ...vessel,
+                size: this._getVesselSize(vessel),
+                angle: this._getVesselAngle(vessel),
+                zoom: currentZoom,
+                color: this._getVesselColor(vessel),
+                icon: this._getVesselIcon(vessel, this._map.getBounds(), currentZoom),
+            });
+        });
         this.setProps({
             layers: [
                 this._createIconLayer(),
@@ -56,42 +76,45 @@ export class VesselsLayer extends DeckLayer {
         });
     }
 
+    private _getVesselSize(d: VesselState): number {
+        let height = (d.dimensions?.a ?? 0) + (d.dimensions?.b ?? 0);
+        return height > 0 ? height : 15;
+    }
+
+    private _getVesselAngle(d: VesselState): number {
+        let angle = 0;
+        if (d.trueHeading != undefined && d.trueHeading != 360) {
+            angle = d.trueHeading;
+        } else {
+            if (
+                (d.speedOverGround != undefined && d.speedOverGround > 1 && d.speedOverGround != 102.3) // speed is defined and available
+                && (d.courseOverGround != undefined && d.courseOverGround != 360) // course is defined and available
+            ) {
+                // vessel is moving, using cog
+                angle = d.courseOverGround;
+            }
+        }
+        return 360 - angle;
+    }
+
+
     private _createIconLayer() {
-        const zoom = this._map.getZoom();
-        const bounds = this._map.getBounds();
-        return new IconLayer<VesselState>({
+        return new IconLayer<ExtendedVesselState>({
             id: `vessels-layer`,
             data: this._data,
-            getIcon: (d: VesselState) => this._getVesselIcon(d, bounds, zoom),
+            getIcon: (d: ExtendedVesselState) => d.icon,
             sizeUnits: 'meters',
             sizeMinPixels: 10,
-            getSize: (d: VesselState) => {
-                let height = (d.dimensions?.a ?? 0) + (d.dimensions?.b ?? 0);
-                return height > 0 ? height : 15;
-            },
-            getPosition: (d: VesselState) => [d.longitude ?? 0, d.latitude ?? 0],
-            getAngle: (d: VesselState) => {
-                let angle = 0;
-                if (d.trueHeading != undefined && d.trueHeading != 360) {
-                    angle = d.trueHeading;
-                } else {
-                    if (
-                        (d.speedOverGround != undefined && d.speedOverGround > 1 && d.speedOverGround != 102.3) // speed is defined and available
-                        && (d.courseOverGround != undefined && d.courseOverGround != 360) // course is defined and available
-                    ) {
-                        // vessel is moving, using cog
-                        angle = d.courseOverGround;
-                    }
-                }
-                return 360 - angle;
-            },
-            getColor: (d: VesselState) => this._getVesselColor(d),
+            getSize: (d: ExtendedVesselState) => d.size,
+            getPosition: (d: ExtendedVesselState) => [d.longitude ?? 0, d.latitude ?? 0],
+            getAngle: (d: ExtendedVesselState) => d.angle,
+            getColor: (d: ExtendedVesselState) => d.color,
             updateTriggers: {
-                getSize: (d: VesselState) => d.dimensions,
-                getIcon: (d: VesselState) => [d.navigationalStatus, d.courseOverGround, d.speedOverGround, this._map.getZoom],
-                getPosition: (d: VesselState) => [d.latitude, d.longitude],
-                getAngle: (d: VesselState) => [d.courseOverGround, d.trueHeading, d.speedOverGround],
-                getColor: (d: VesselState) => d.typeOfShipAndCargoType,
+                getSize: (d: ExtendedVesselState) => d.size,
+                getIcon: (d: ExtendedVesselState) => d.icon,
+                getPosition: (d: ExtendedVesselState) => [d.latitude, d.longitude],
+                getAngle: (d: ExtendedVesselState) => d.angle,
+                getColor: (d: ExtendedVesselState) => d.color,
             },
             transitions: {
                 getPosition: {
@@ -99,8 +122,12 @@ export class VesselsLayer extends DeckLayer {
                 }
             },
             pickable: true,
-            onClick: this.onVesselClicked,
+            onClick: this._vesselClicked,
         });
+    }
+
+    private _vesselClicked(pickingInfo: PickingInfo<ExtendedVesselState>, event: any) {
+        this.onVesselClicked?.(pickingInfo, event);
     }
 
 
@@ -117,7 +144,9 @@ export class VesselsLayer extends DeckLayer {
                     const svg = `<svg width="${width + 2}" height="${height + 2}" xmlns="http://www.w3.org/2000/svg">` +
                         `<path fill-rule='evenodd' d='` +
                         `M ${1 + width / 2.0} 1 L ${1 + width} ${1 + height / 5.0} L ${width + 1} ${height + 1} L 1 ${1 + height} L 1 ${1 + height / 5.0}` +
-                        `' stroke-width='1' />` +
+                        `' stroke-width='1'>` +
+                        ` <animate attributeType="XML" attributeName="fill"  values="#800;#f00;#800;#800" dur="0.8s" repeatCount="indefinite"/>`+
+                        `</path>` +
                         `</svg>`
 
                     return {
