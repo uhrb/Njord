@@ -75,6 +75,10 @@ namespace Njord.Ais.MessageProcessing
                         ConstructGenericJoin(blockDicts, block, pipelineCancelation);
                         break;
 
+                    case MessageBlockType.Buffer:
+                        ConstructGenericBuffer(blockDicts, block, pipelineCancelation);
+                        break;
+
                     default:
                         throw new DataMisalignedException("Unknown block type");
                 }
@@ -200,6 +204,17 @@ namespace Njord.Ais.MessageProcessing
             genericMethod.Invoke(this, [_provider, block, blockDicts, sourceArms, _messagesCount, pipelineName, pipelineCancelation]);
         }
 
+        private void ConstructGenericBuffer(Dictionary<string, IDataflowBlock> blockDicts, MessagePipelineBlock block, CancellationToken pipelineCancelation)
+        {
+            if (block.InputType == null || block.InstanceType != null || block.OutputType == null || block.InputType != block.OutputType)
+            {
+                throw new DataMisalignedException("Buffer block should have no instance type and input and output types should be equal");
+            }
+            var method = typeof(DataflowPipelineBuilder).GetMethod(nameof(ConstructBuffer), BindingFlags.Static | BindingFlags.NonPublic)!;
+            var genericMethod = method.MakeGenericMethod(block.InputType);
+            genericMethod.Invoke(this, [block, blockDicts, pipelineCancelation]);
+        }
+
         private static void LinkBlocks<TMessage>(ISourceBlock<TMessage> source, ITargetBlock<TMessage> target)
         {
             source.LinkTo(target);
@@ -225,6 +240,24 @@ namespace Njord.Ais.MessageProcessing
                 {
                 }
             }
+        }
+
+        private static void ConstructBuffer<TMessage>(
+            MessagePipelineBlock block,
+            Dictionary<string, IDataflowBlock> blockDicts,
+            CancellationToken pipelineCancelation)
+        {
+            if (block.Outputs?.Count() != 1)
+            {
+                throw new DataMisalignedException("Source interface need to gave exactly one output");
+            }
+           
+            var blockInstance = new BufferBlock<TMessage>(new DataflowBlockOptions
+            {
+                CancellationToken = pipelineCancelation,
+            })!;
+
+            blockDicts.Add(block.Name, blockInstance);
         }
 
         private static void ConstructSource<TInstance, TMessage>(

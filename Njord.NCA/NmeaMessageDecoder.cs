@@ -1,6 +1,8 @@
-﻿namespace Njord.NCA
+﻿using System.Text;
+
+namespace Njord.NCA
 {
-    public class AisMessageDecoder
+    public class NmeaMessageDecoder
     {
         // <format>,<message count>,<message id>,<sequence id>,<channel A/B>,<data>,<fill bits>
         // Words 2,3 and 4 are the no of parts, this part and a part id
@@ -16,8 +18,22 @@
         // !BSVDM,1,1,,A,33o6t@50001;upbWFlOc<pLh0DQJ,0*6C
         // !AIVDM, !AIVDO, !BSVDM, !ABVDM
         // The first word !AIVDM is the name of the sentence, the last 2 characters are the checksum.
+        // \s:2573300,c:1745314223*0E\!BSVDM,2,1,1,B,53omwv81t0j@h=0L000Pu1<Hu8@0000000000166?5658A5:hRCQlh@000,0*0A
+        // c: 1745314223 - unix timestamp
 
-
-
+        public void DecodeFromString(string nmea, Encoding enc)
+        {
+            var parts = nmea.Split(',');
+            var messageForm = parts[0];
+            var messageCount = int.Parse(parts[1]);
+            var messageId = int.Parse(parts[2]);
+            var sequenceId = int.Parse(parts[3]);
+            var channel = parts[4];
+            var data = parts[5];
+            var checkSum = parts[6];
+            var bytes = enc.GetBytes(data);
+            var aisMessageId = bytes[0] & 0_0011_1111;
+            var repeatIndicator = bytes[0] & 0_1100_0000;
+        }
     }
 }

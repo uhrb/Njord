@@ -23,6 +23,7 @@
 		<ProjectReference Include="..\Njord.Ais.MessageProcessing\Njord.Ais.MessageProcessing.csproj" />
 		<ProjectReference Include="..\Njord.AisStream\Njord.AisStream.csproj" />
 		<ProjectReference Include="..\Njord.NanoOrm\Njord.NanoOrm.csproj" />
+		<ProjectReference Include="..\Njord.NCA\Njord.NCA.csproj" />
 		<ProjectReference Include="..\Njord.OpenTelemetry\Njord.OpenTelemetry.csproj" />
 	</ItemGroup>
 

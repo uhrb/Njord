@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Njord.Ais.MessageProcessing;
 using Njord.Ais.MessageProcessing.Sinks;
 using Njord.AisStream;
+using Njord.NCA;
 
 namespace Njord.MessageCollector
 {
@@ -31,6 +32,26 @@ namespace Njord.MessageCollector
                         OutputType = typeof(RawAisMessage),
                         BlockType = MessageBlockType.Source,
                         Outputs = [
+                            "RawBuffer"
+                        ]
+                    },
+                    new MessagePipelineBlock {
+                        Name = "NcaStreamSource",
+                        InstanceType = typeof(NcaStreamRawMessageSourceProxy),
+                        InputType = null,
+                        OutputType = typeof(RawAisMessage),
+                        BlockType = MessageBlockType.Source,
+                        Outputs = [
+                            "RawBuffer"
+                        ]
+                    },
+                    new MessagePipelineBlock {
+                        Name = "RawBuffer",
+                        InstanceType = null,
+                        InputType = typeof(RawAisMessage),
+                        OutputType = typeof(RawAisMessage),
+                        BlockType = MessageBlockType.Buffer,
+                        Outputs = [
                             "RawBroadcast"
                         ]
                     },
@@ -41,17 +62,17 @@ namespace Njord.MessageCollector
                         OutputType = typeof(RawAisMessage),
                         BlockType = MessageBlockType.GuranteedBroadcast,
                         Outputs = [
-                            "StringCategoryMapping",
+                           // "StringCategoryMapping",
                             "LogSinkRaw",
                         ]
                     },
                     new MessagePipelineBlock {
                         Name = "LogSinkRaw",
-                        InstanceType = typeof(NullSink<RawAisMessage>),
+                        InstanceType = typeof(InformationalLogMessageSink),
                         InputType = typeof(RawAisMessage),
                         OutputType = null,
                         BlockType = MessageBlockType.Sink,
-                    },
+                    }, /*
                     new MessagePipelineBlock {
                         Name = "StringCategoryMapping",
                         InstanceType= typeof(StringCategoryMappingSink),
@@ -59,6 +80,7 @@ namespace Njord.MessageCollector
                         OutputType = null,
                         BlockType = MessageBlockType.Sink,
                     }
+                    */
                 ]
             };
             _logger.LogInformation("Dataflow service starting");

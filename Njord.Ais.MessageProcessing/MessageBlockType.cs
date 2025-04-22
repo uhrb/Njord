@@ -7,6 +7,7 @@
         Transformer,
         Broadcast,
         Join,
-        GuranteedBroadcast
+        GuranteedBroadcast,
+        Buffer
     }
 }

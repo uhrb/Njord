@@ -20,6 +20,7 @@ namespace Njord.AisStream
         private readonly double[][][] _boundingBoxes;
         private readonly Counter<long> _messageReceivedCounter;
         private readonly Counter<long> _exceptionCounter;
+        private readonly int _reconnectDelay;
 
         public AisStreamRawMessageSourceService(
             ILogger<AisStreamRawMessageSourceService> logger,
@@ -37,6 +38,7 @@ namespace Njord.AisStream
             var meter = meterFactory.Create(fullName, "v1.0");
             _messageReceivedCounter = meter.CreateCounter<long>($"{fullName}.messagesReceived");
             _exceptionCounter = meter.CreateCounter<long>($"{fullName}.exceptionsCount");
+            _reconnectDelay = options.Value.ReconnectDelaySeconds;
         }
 
         protected override async Task ExecuteAsync(CancellationToken token)
@@ -45,7 +47,7 @@ namespace Njord.AisStream
             {
                 try
                 {
-                    await Task.Delay(1000, token);
+                    await Task.Delay(_reconnectDelay * 1000, token);
                     var connectionId = Guid.NewGuid().ToString("N");
                     using ClientWebSocket _webSocket = new();
                     _logger.LogInformation("Connecting to AIS stream");
@@ -100,7 +102,7 @@ namespace Njord.AisStream
                         return;
                     }
                     _exceptionCounter.Add(1);
-                    _logger.LogError(ex, "AIS service restarting in 3 seconds");
+                    _logger.LogError(ex, "AIS service restarting in {_reconnectDelay} seconds", _reconnectDelay);
                 }
             }
         }

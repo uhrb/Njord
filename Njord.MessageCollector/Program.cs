@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Njord.Ais.MessageProcessing;
 using Njord.Ais.MessageProcessing.Sinks;
 using Njord.AisStream;
+using Njord.NCA;
 using Njord.OpenTelemetry;
 using OpenTelemetry.Metrics;
 using System.Reactive.Linq;
@@ -22,13 +23,16 @@ namespace Njord.MessageCollector
                 services.AddLogging();
                 services.AddMetrics();
                 services.Configure<AisStreamRawMessageSourceOptions>(context.Configuration.GetSection(nameof(AisStreamRawMessageSourceOptions)));
+                services.Configure<NcaStreamRawMessageSourceOptions>(context.Configuration.GetSection(nameof(NcaStreamRawMessageSourceOptions)));
                 services.Configure<StringCategoryMappingSinkOptions>(context.Configuration.GetSection(nameof(StringCategoryMappingSinkOptions)));
                 services.AddTransient<InformationalLogMessageSink>();
                 services.AddSingleton<StringCategoryMappingSink>();
                 services.AddTransient<NullSink<RawAisMessage>>();
                 services.AddSingleton<AisStreamMessageSourceProxy>();
+                services.AddSingleton<NcaStreamRawMessageSourceProxy>();
                 services.AddSingleton<IDataflowPipelineBuilder, DataflowPipelineBuilder>();
                 services.AddHostedService<AisStreamRawMessageSourceService>();
+                services.AddHostedService<NcaStreamRawMessageSourceService>();
                 services.AddHostedService<MessageProcessor>();
                 services.AddOpenTelemetry()
                     .WithMetrics(metrics =>
@@ -36,6 +40,7 @@ namespace Njord.MessageCollector
                         metrics
                         .AddMeter(typeof(AisStreamRawMessageSourceService).FullName!)
                         .AddMeter(typeof(StringCategoryMappingSink).FullName!)
+                        .AddMeter(typeof(NcaStreamRawMessageSourceService).FullName!)
                         .AddMeter(typeof(DataflowPipelineBuilder).FullName!)
                         .AddReader(_ =>
                             new PeriodicExportingMetricReader(

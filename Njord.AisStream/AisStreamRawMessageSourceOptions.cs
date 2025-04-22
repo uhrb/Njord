@@ -6,5 +6,6 @@
         public required Uri Uri { get; init; }
         public required double[][][] BoundingBoxes { get; init; }
         public required string[] FilterMessageTypes { get; init; }
+        public required int ReconnectDelaySeconds { get; init; }
     }
 }

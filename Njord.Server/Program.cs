@@ -14,6 +14,7 @@ using Orleans.Serialization;
 using Orleans.Runtime.Hosting;
 using Orleans.Providers;
 using Njord.Server.Grains.Instrumentation;
+using Njord.NCA;
 
 namespace Njord.Server
 {
@@ -23,6 +24,7 @@ namespace Njord.Server
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.Configure<AisStreamRawMessageSourceOptions>(builder.Configuration.GetSection(nameof(AisStreamRawMessageSourceOptions)));
+            builder.Services.Configure<NcaStreamRawMessageSourceOptions>(builder.Configuration.GetSection(nameof(NcaStreamRawMessageSourceOptions)));
             builder.Services.AddSingleton<IMessageBroadcaster, MessageBroadcaster>();
             builder.Services.AddTransient<InformationalLogMessageSink>();
             builder.Services.AddTransient<NullSink<RawAisMessage>>();
@@ -30,8 +32,10 @@ namespace Njord.Server
             builder.Services.AddTransient<OrleansSink>();
             builder.Services.AddTransient<AisStreamMessageTransformer>();
             builder.Services.AddSingleton<AisStreamMessageSourceProxy>();
+            builder.Services.AddSingleton<NcaStreamRawMessageSourceProxy>();
             builder.Services.AddTransient<IDataflowPipelineBuilder, DataflowPipelineBuilder>();
             builder.Services.AddHostedService<MessageProcessingService>();
+            builder.Services.AddHostedService<NcaStreamRawMessageSourceService>();
             builder.Services.AddHostedService<AisStreamRawMessageSourceService>();
             builder.Services.AddTransient<ServerHealthCheck>();
             builder.Services.AddSingleton<IGrainAccessor, GrainAccessor>();
@@ -45,12 +49,12 @@ namespace Njord.Server
                         .AddMeter("Microsoft.Orleans")
                         .AddMeter(typeof(AisStreamRawMessageSourceService).FullName!)
                         .AddMeter(typeof(DataflowPipelineBuilder).FullName!)
+                        .AddMeter(typeof(NcaStreamRawMessageSourceService).FullName!)
                         .AddReader(_ =>
                             new PeriodicExportingMetricReader(
                                 new LogMetricExporter(
                                         _.GetRequiredService<ILogger<LogMetricExporter>>()
-                                    ),
-                                120000 // 2 minutes
+                                    )
                             )
                         )
                         .AddReader(_ =>
