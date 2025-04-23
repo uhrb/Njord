@@ -1,17 +1,22 @@
-import { MapView, PickingInfo } from "@deck.gl/core";
+import type { PickingInfo } from "@deck.gl/core";
+import { MapView } from "@deck.gl/core";
 import { DeckLayer } from "./community";
-import { VesselState } from "./VesselState";
+import type { VesselState } from "../types/VesselState";
 import { IconLayer } from "@deck.gl/layers";
 import { FormatterHelper } from "./FormatterHelper";
 import { LatLngBounds } from "leaflet";
-import { UnpackedIcon } from "@deck.gl/layers/dist/icon-layer/icon-manager";
+
+import movingStatus from "../assets/moving-status.svg";
+import pirateStatus from "../assets/pirate-status.svg";
+import questionStatus from "../assets/question-status.svg";
+import stoppedStatus from "../assets/stopped-status.svg";
 
 type ExtendedVesselState = VesselState & {
     size: number;
     angle: number;
     zoom: number;
     color: [number, number, number, number];
-    icon: UnpackedIcon;
+    icon: { url: string; width: number; height: number; anchorX: number; anchorY: number; mask: boolean };
 }
 
 export class VesselsLayer extends DeckLayer {
@@ -133,7 +138,7 @@ export class VesselsLayer extends DeckLayer {
 
     private _getVesselIcon(vessel: VesselState, bounds: LatLngBounds, zoom: number) {
 
-        let url: string = 'assets/question-status.svg';
+        let url: string = questionStatus;
 
         if (zoom >= 13 && bounds.contains({ lat: vessel.latitude!, lng: vessel.longitude! })) {
             if (vessel.dimensions != undefined) {
@@ -145,7 +150,7 @@ export class VesselsLayer extends DeckLayer {
                         `<path fill-rule='evenodd' d='` +
                         `M ${1 + width / 2.0} 1 L ${1 + width} ${1 + height / 5.0} L ${width + 1} ${height + 1} L 1 ${1 + height} L 1 ${1 + height / 5.0}` +
                         `' stroke-width='1'>` +
-                        ` <animate attributeType="XML" attributeName="fill"  values="#800;#f00;#800;#800" dur="0.8s" repeatCount="indefinite"/>`+
+                        ` <animate attributeType="XML" attributeName="fill"  values="#800;#f00;#800;#800" dur="0.8s" repeatCount="indefinite"/>` +
                         `</path>` +
                         `</svg>`
 
@@ -168,19 +173,19 @@ export class VesselsLayer extends DeckLayer {
             case 3: // restricted maneuverability
             case 4: // constrained by draft
             case 7: // fishing
-                url = 'assets/moving-status.svg';
+                url = movingStatus;
                 break;
             case 1: // at anchor
             case 5: // moored
             case 6: // aground
-                url = 'assets/stopped-status.svg';
+                url = stoppedStatus;
                 break;
             case 2: // not under command
-                url = 'assets/pirate-status.svg';
+                url = pirateStatus;
                 break;
             default:
                 if ((vessel.speedOverGround ?? 0 > 1) || (vessel.courseOverGround ?? 0 > 1)) {
-                    url = 'assets/moving-status.svg';
+                    url = movingStatus;
                 }
                 break;
         }
