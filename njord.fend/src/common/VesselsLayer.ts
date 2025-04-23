@@ -61,10 +61,10 @@ export class VesselsLayer extends DeckLayer {
 
     public onVesselClicked?: ((pickingInfo: PickingInfo<VesselState>, event: any) => boolean | void) | null
 
-    public updateLayerData(vessels: VesselState[]) {
+    public updateLayerData(vessels: Iterable<VesselState>) {
         this._data = [];
         const currentZoom = this._map.getZoom();
-        vessels.forEach((vessel) => {
+        for (const vessel of vessels) {
             this._data.push({
                 ...vessel,
                 size: this._getVesselSize(vessel),
@@ -73,7 +73,7 @@ export class VesselsLayer extends DeckLayer {
                 color: this._getVesselColor(vessel),
                 icon: this._getVesselIcon(vessel, this._map.getBounds(), currentZoom),
             });
-        });
+        };
         this.setProps({
             layers: [
                 this._createIconLayer(),
