@@ -1,5 +1,5 @@
-import { ETA } from './ETA';
-import { Dimensions } from './Dimensions';
+import { type ETA } from './ETA';
+import { type Dimensions } from './Dimensions';
 
 export type VesselState = {
     mmsi?: string;

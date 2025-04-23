@@ -2,8 +2,6 @@ import type { VesselState } from "@/types/VesselState";
 import { HttpTransportType, HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
 
-export type Subscription = (objectType: string, objectId: string, objectState: unknown) => void;
-
 export class DataStream {
 
     _connection: HubConnection;

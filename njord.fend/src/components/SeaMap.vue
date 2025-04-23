@@ -9,8 +9,8 @@ import type { VesselState } from '@/types/VesselState';
 import 'leaflet/dist/leaflet.css';
 import { VesselsLayer } from '@/common/VesselsLayer';
 import { onMounted, inject } from "vue";
-import { DataStream } from '@/services/dataStream';
 import { useIntervalFn } from '@vueuse/core'
+import type { DataStream } from '@/services/DataStream';
 
 const dataStream: DataStream = inject("dataStream")!;
 
