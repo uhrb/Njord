@@ -41,7 +41,7 @@ export class VesselsLayer extends DeckLayer {
                         `<tr><td>COG/SOG</td><td>${FormatterHelper.getDegreeString(object.courseOverGround, 360)} / ${object.speedOverGround?.toFixed(2) + ' kn'}</td></tr>` +
                         `<tr><td>Lat/Lon</td><td>${FormatterHelper.getDegreeString(object.latitude, 91, 5)}/${FormatterHelper.getDegreeString(object.longitude, 181, 5)}</td></tr>` +
                         `<tr><td>True Heading</td><td>${FormatterHelper.getDegreeString(object.trueHeading, 511)}</td></tr>` +
-                        `<tr><td>Updated</td><td>${new Date(Date.parse(object.updated!)).toLocaleTimeString()}</td></tr>` +
+                        `<tr><td>Updated</td><td>${FormatterHelper.getLocalDate(object.updated)}</td></tr>` +
                         '</table>'
                 };
             },
