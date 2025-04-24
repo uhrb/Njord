@@ -1,19 +1,9 @@
 body {
     background-color: #f0f0f0;
     font-family: sans-serif;
-    padding: 2rem;
+    padding:0px;
+    margin: 0px;
 }
 
-.info {
-    color: black;
-    font-weight: bold;
-    background-color: rgb(250, 235, 215, 0.5);
-}
 
-#map {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-}
+

@@ -1,28 +1,23 @@
 <template>
-  <SeaMap :vessels="vessels" :ship-type-name-mappings="shipTypeNameMappings" :navigation-status-mappings="navigationStatusMappings"></SeaMap>
+  <v-app>
+    <v-app-bar color="teal-lighten-5">
+      <template v-slot:append>
+        <v-container>
+          <v-row>
+            <v-col>Vessels</v-col>
+            <v-col>{{ objectsStore.vesselsCount }}</v-col>
+          </v-row>
+        </v-container>
+      </template>
+    </v-app-bar>
+    <v-main>
+      <SeaMap :vessels="objectsStore.vessels"></SeaMap>
+    </v-main>
+  </v-app>
 </template>
 <script setup lang="ts">
-import { HttpTransportType, HubConnectionBuilder } from "@microsoft/signalr";
-import SeaMap from "@/components/SeaMap.vue"
-import type { VesselState } from "@/types/VesselState";
+import SeaMap from "@/components/SeaMap.vue";
 
-import { ref } from "vue";
-
-const vessels = ref<Map<string,VesselState>>(new Map<string, VesselState>());
-const shipTypeNameMappings = ref<Record<number, string | undefined>>({});
-const navigationStatusMappings = ref<Record<number, string | undefined>>({});
-
-function parseVesselUpdate(objectId: string, objectState: any) {
-  var vsl: VesselState = {
-    mmsi: objectId,
-    ...objectState,
-  }
-  vessels.value.set(objectId, vsl);
-}
-
-
-
-
-
+import { objectsStore } from "@/stores/objectsStore";
 
 </script>

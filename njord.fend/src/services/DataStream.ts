@@ -1,14 +1,14 @@
 import type { VesselState } from "@/types/VesselState";
 import { HttpTransportType, HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 
+import { mappingsStore } from "@/stores/mappingsStore";
+import { objectsStore } from "@/stores/objectsStore";
+import { useIntervalFn } from "@vueuse/core";
 
 export class DataStream {
 
     _connection: HubConnection;
-    public Vessels: Map<string, VesselState> = new Map();
-    public ShipTypeNameMappings: Record<number, string | undefined> = {};
-    public NavigationStatusMappings: Record<number, string | undefined> = {};
-
+    _vessels: Map<string, VesselState> = new Map();
 
     constructor() {
         this._connection = new HubConnectionBuilder()
@@ -24,6 +24,7 @@ export class DataStream {
         this._connection.on("Update", (objectType, objectId, objectState) => {
             switch (objectType) {
                 case "Vessel":
+                    // TODO offload to background?
                     this._parseVesselUpdate(objectId, objectState);
                     break;
                 default:
@@ -32,13 +33,18 @@ export class DataStream {
         });
         this._connection.start().then(async () => {
             await this._connection.invoke("CommandGetShipTypeMappings").then((result: Record<number, string | undefined>) => {
-                Object.assign(this.ShipTypeNameMappings, result);
+                Object.assign(mappingsStore.ShipTypeNameMappings, result);
             });
             await this._connection.invoke("CommandGetNavigationStatusMappings").then((result: Record<number, string | undefined>) => {
-                Object.assign(this.NavigationStatusMappings, result);
+                Object.assign(mappingsStore.NavigationStatusMappings, result);
             });
             await this._connection.invoke("CommandSendAllStatesByType", "Vessel");
         });
+
+        useIntervalFn(() => {
+            objectsStore.vessels = this._vessels.values();
+            objectsStore.vesselsCount = this._vessels.size;
+        }, 1000)
     }
 
     private _parseVesselUpdate(objectId: string, objectState: any) {
@@ -46,6 +52,6 @@ export class DataStream {
             mmsi: objectId,
             ...objectState,
         }
-        this.Vessels.set(objectId, vsl);
+        this._vessels.set(objectId, vsl);
     }
 }

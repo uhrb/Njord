@@ -59,20 +59,35 @@ export class VesselsLayer extends DeckLayer {
     private _data: ExtendedVesselState[] = [];
 
 
-    public onVesselClicked?: ((pickingInfo: PickingInfo<VesselState>, event: any) => boolean | void) | null
+    public onVesselClicked?: (pickingInfo: PickingInfo<VesselState>, event: any) => void;
 
     public updateLayerData(vessels: Iterable<VesselState>) {
         this._data = [];
+        //TODO offload data calculation to background?
+        let i = 0;
         const currentZoom = this._map.getZoom();
         for (const vessel of vessels) {
-            this._data.push({
-                ...vessel,
-                size: this._getVesselSize(vessel),
-                angle: this._getVesselAngle(vessel),
-                zoom: currentZoom,
-                color: this._getVesselColor(vessel),
-                icon: this._getVesselIcon(vessel, this._map.getBounds(), currentZoom),
-            });
+            if (i >= this._data.length) {
+                this._data.push({
+                    ...vessel,
+                    size: this._getVesselSize(vessel),
+                    angle: this._getVesselAngle(vessel),
+                    zoom: currentZoom,
+                    color: this._getVesselColor(vessel),
+                    icon: this._getVesselIcon(vessel, this._map.getBounds(), currentZoom),
+                });
+            } else {
+                Object.assign(this._data[i], {
+                    ...vessel,
+                    size: this._getVesselSize(vessel),
+                    angle: this._getVesselAngle(vessel),
+                    zoom: currentZoom,
+                    color: this._getVesselColor(vessel),
+                    icon: this._getVesselIcon(vessel, this._map.getBounds(), currentZoom)
+                });
+            }
+            i++;
+
         };
         this.setProps({
             layers: [
@@ -88,14 +103,11 @@ export class VesselsLayer extends DeckLayer {
 
     private _getVesselAngle(d: VesselState): number {
         let angle = 0;
-        if (d.trueHeading != undefined && d.trueHeading != 360) {
+        if (d.trueHeading != undefined && d.trueHeading != 511) {
             angle = d.trueHeading;
-        } else {
-            if (
-                (d.speedOverGround != undefined && d.speedOverGround > 1 && d.speedOverGround != 102.3) // speed is defined and available
-                && (d.courseOverGround != undefined && d.courseOverGround != 360) // course is defined and available
-            ) {
-                // vessel is moving, using cog
+        }
+        else {
+            if (d.courseOverGround != undefined && d.courseOverGround != 360) {
                 angle = d.courseOverGround;
             }
         }
@@ -127,7 +139,7 @@ export class VesselsLayer extends DeckLayer {
                 }
             },
             pickable: true,
-            onClick: this._vesselClicked,
+            onClick: (a, b) => this._vesselClicked(a, b),
         });
     }
 
@@ -140,7 +152,7 @@ export class VesselsLayer extends DeckLayer {
 
         let url: string = questionStatus;
 
-        if (zoom >= 13 && bounds.contains({ lat: vessel.latitude!, lng: vessel.longitude! })) {
+        if (zoom >= 14 && bounds.contains({ lat: vessel.latitude!, lng: vessel.longitude! })) {
             if (vessel.dimensions != undefined) {
                 const height = (vessel.dimensions.b ?? 0) + (vessel.dimensions.a ?? 0);
                 const width = (vessel.dimensions.c ?? 0) + (vessel.dimensions.d ?? 0);
