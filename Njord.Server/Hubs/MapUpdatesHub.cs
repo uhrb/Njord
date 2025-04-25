@@ -24,15 +24,18 @@ namespace Njord.Server.Hubs
         }
 
 
-        public async Task CommandSendAllStatesByType(string type)
+        public async Task CommandSendAllStatesByTypes(string[] types)
         {
-            var states = _queries.GetAllStatesByGrainType(type);
-            foreach(var state in states)
+            foreach (var type in types)
             {
-                if (state.GrainState.Longitude != LongitudeAndLatitudeExtensions.LongitudeNotAvailable
-                     && state.GrainState.Latitude != LongitudeAndLatitudeExtensions.LatitudeNotAvailable)
+                var states = _queries.GetAllStatesByGrainType(type);
+                foreach (var state in states)
                 {
-                    await Clients.Caller.SendAsync("Update", state.GrainType, state.GrainId, state.GrainState);
+                    if (state.GrainState.Longitude != LongitudeAndLatitudeExtensions.LongitudeNotAvailable
+                         && state.GrainState.Latitude != LongitudeAndLatitudeExtensions.LatitudeNotAvailable)
+                    {
+                        await Clients.Caller.SendAsync("Update", state.GrainType, state.GrainId, state.GrainState);
+                    }
                 }
             }
         }
@@ -56,8 +59,6 @@ namespace Njord.Server.Hubs
         {
             return GetEnumNamesMappings<PositionFixingDeviceType>(_ => (int)_);
         }
-
-
 
         private static Dictionary<int, string?> GetEnumNamesMappings<T>(Func<T, int> conv) where T : struct, Enum
         {

@@ -4,7 +4,7 @@
     <template v-slot:title>
       {{ mapStateStore.selectedVessel.name }} <span class="text-disabled"> {{
         mapStateStore.selectedVessel.callSign }}</span>
-      <v-btn variant="text" class="float-end" @click="mapStateStore.selectedVessel = undefined">X</v-btn>
+      <v-btn variant="text" class="float-end" @click="closeInfoPanel">X</v-btn>
     </template>
 
     <template v-slot:subtitle>
@@ -25,7 +25,7 @@
             <td>MMSI / IMO</td>
             <td><a :href="`https://www.vesselfinder.com/vessels/details/${mapStateStore.selectedVessel.mmsi}`"
                 target="_blank">{{ mapStateStore.selectedVessel.mmsi }}</a> / {{ mapStateStore.selectedVessel.imoNumber
-              }}</td>
+                }}</td>
           </tr>
           <tr>
             <td>Destination</td>
@@ -106,7 +106,7 @@ import * as L from 'leaflet';
 import type { PickingInfo } from '@deck.gl/core';
 import type { VesselState } from '@/types/VesselState';
 import 'leaflet/dist/leaflet.css';
-import { VesselsLayer } from '@/common/VesselsLayer';
+import { MaritimeLayer } from '@/common/MaritimeLayer';
 import { computed, onMounted, watch } from "vue";
 
 import { FormatterHelper } from '@/common/FormatterHelper';
@@ -119,9 +119,14 @@ const mapInitialState: L.MapOptions = {
 import { mappingsStore } from '@/stores/mappingsStore';
 import { mapStateStore } from '@/stores/mapStateStore';
 import { VesselHelper } from '@/common/VesselHelper';
+import { NavigationHelper } from '@/common/NavigationHelper';
+import type { SarState } from '@/types/SarState';
 
 const props = defineProps<{
-  vessels: Iterable<VesselState>
+  vessels: Iterable<VesselState>,
+  sarFixedWing: Iterable<SarState>,
+  sarsVisibility: boolean,
+  vesselsVisibity: boolean
 }>();
 
 const computedVesselIcon = computed<string>(() => {
@@ -133,7 +138,7 @@ const computedVesselIcon = computed<string>(() => {
   if (mapStateStore.selectedVessel != undefined && mapStateStore.selectedVessel.dimensions != undefined) {
     width = (mapStateStore.selectedVessel.dimensions.c ?? 0) + (mapStateStore.selectedVessel.dimensions.d ?? 0);
     height = (mapStateStore.selectedVessel.dimensions.a ?? 0) + (mapStateStore.selectedVessel.dimensions.b ?? 0);
-    angle = VesselHelper.getVesselAngle(mapStateStore.selectedVessel.trueHeading, mapStateStore.selectedVessel.courseOverGround);
+    angle = NavigationHelper.getAngle(mapStateStore.selectedVessel.trueHeading, mapStateStore.selectedVessel.courseOverGround);
     cog = mapStateStore.selectedVessel.courseOverGround ?? 0;
     th = mapStateStore.selectedVessel.trueHeading ?? 0;
     th = 360 - (th == 511 ? 0 : th);
@@ -153,23 +158,22 @@ const computedVesselIcon = computed<string>(() => {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 })
 
+const mariTimeLayer = new MaritimeLayer(mappingsStore.ShipTypeNameMappings, mappingsStore.NavigationStatusMappings);
 
+mariTimeLayer.onVesselClicked = (info: PickingInfo<VesselState>, event: any) => {
+  mapStateStore.selectedVessel = info.object;
+}
 
-onMounted(() => {
-
-  const map = L.map(document.getElementById('map')!, mapInitialState);
-
+const layers = [
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 17,
     minZoom: 3,
-  }).addTo(map);
-
+  }),
   L.tileLayer('https://t1.openseamap.org/seamark/{z}/{x}/{y}.png', {
     maxZoom: 17,
     minZoom: 3,
-  }).addTo(map);
-
+  }),
   L.tileLayer.wms('https://geoserver.openseamap.org/geoserver/gwc/service/wms?', {
     layers: 'gebco2021:gebco2021_contour',
     transparent: true,
@@ -178,8 +182,7 @@ onMounted(() => {
     maxZoom: 17,
     minZoom: 3,
     attribution: '© OpenSeaMap contributors'
-  }).addTo(map);
-
+  }),
   L.tileLayer.wms('https://geoserver.openseamap.org/geoserver/gwc/service/wms?', {
     layers: 'gebco2021:gebco_2021_poly',
     transparent: true,
@@ -187,23 +190,28 @@ onMounted(() => {
     opacity: 0.3,
     maxZoom: 17,
     minZoom: 3,
-  }).addTo(map);
+  }),
+  mariTimeLayer
+]
 
-  const vesselsLayer = new VesselsLayer(mappingsStore.ShipTypeNameMappings, mappingsStore.NavigationStatusMappings);
+function closeInfoPanel() {
+  mapStateStore.selectedVessel = undefined;
+}
 
+watch(props, () => {
+  mariTimeLayer.updateVesselsData(props.vessels);
+  mariTimeLayer.updateSarData(props.sarFixedWing);
+  mariTimeLayer.setSarsVisibility(props.sarsVisibility);
+  mariTimeLayer.setVesselsVisibility(props.vesselsVisibity);
+  mariTimeLayer.render();
+});
 
-  vesselsLayer.onVesselClicked = (info: PickingInfo<VesselState>, event: any) => {
-    mapStateStore.selectedVessel = info.object;
+onMounted(() => {
+  const map = L.map(document.getElementById('map')!, mapInitialState);
+  for (const layer of layers) {
+    layer.addTo(map)
   }
-
-  console.log(vesselsLayer.onVesselClicked);
-
-  map.addLayer(vesselsLayer);
-
-  watch(props, () => {
-    vesselsLayer.updateLayerData(props.vessels);
-  });
-
+  map.addLayer(mariTimeLayer);
 });
 </script>
 <style lang="css">
