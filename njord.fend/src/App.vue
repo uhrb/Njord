@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar color="teal-lighten-5">
+    <v-app-bar>
       <template v-slot:append>
         <v-container>
           <v-row>

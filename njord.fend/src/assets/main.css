@@ -1,9 +1,11 @@
 body {
-    background-color: #f0f0f0;
-    font-family: sans-serif;
     padding:0px;
     margin: 0px;
 }
 
-
+.map-tooltip {
+    background-color: #f3e3c3;
+    margin: 0px;
+    color:rgba(0, 0, 0, 0.87);
+}
 

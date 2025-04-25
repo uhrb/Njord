@@ -2,13 +2,14 @@
   <div id="map"></div>
   <v-card class="floating-card" v-if="mapStateStore.selectedVessel != undefined">
     <template v-slot:title>
-      <a :href="`https://www.vesselfinder.com/vessels/details/${mapStateStore.selectedVessel.mmsi}`" target="_blank">{{ mapStateStore.selectedVessel.name }}</a> <span class="text-disabled"> {{
+      {{ mapStateStore.selectedVessel.name }} <span class="text-disabled"> {{
         mapStateStore.selectedVessel.callSign }}</span>
+      <v-btn variant="text" class="float-end" @click="mapStateStore.selectedVessel = undefined">X</v-btn>
     </template>
 
     <template v-slot:subtitle>
       <div>
-         {{ FormatterHelper.getMappedName(mapStateStore.selectedVessel.typeOfShipAndCargoType,
+        {{ FormatterHelper.getMappedName(mapStateStore.selectedVessel.typeOfShipAndCargoType,
           mappingsStore.ShipTypeNameMappings, "Unknown") }}
       </div>
       <div>
@@ -22,7 +23,9 @@
         <tbody>
           <tr>
             <td>MMSI / IMO</td>
-            <td>{{ mapStateStore.selectedVessel.mmsi }} / {{ mapStateStore.selectedVessel.imoNumber }}</td>
+            <td><a :href="`https://www.vesselfinder.com/vessels/details/${mapStateStore.selectedVessel.mmsi}`"
+                target="_blank">{{ mapStateStore.selectedVessel.mmsi }}</a> / {{ mapStateStore.selectedVessel.imoNumber
+              }}</td>
           </tr>
           <tr>
             <td>Destination</td>
@@ -35,41 +38,50 @@
           <tr>
             <td>Latitude / Longitude</td>
             <td>
-              {{ FormatterHelper.getDegreeString(mapStateStore.selectedVessel.latitude, 91, 4, "Unknown", "Not available") }} /
-              {{ FormatterHelper.getDegreeString(mapStateStore.selectedVessel.longitude, 181, 4, "Unknown", "Not available") }}
+              {{ FormatterHelper.getDegreeString(mapStateStore.selectedVessel.latitude, 91, 4, "Unknown",
+                "Not available") }} /
+              {{ FormatterHelper.getDegreeString(mapStateStore.selectedVessel.longitude, 181, 4, "Unknown",
+                "Not available") }}
             </td>
           </tr>
           <tr>
             <td>Accuracy / RAIM / Type </td>
             <td>
-              {{ FormatterHelper.getUndefTrueFalse(mapStateStore.selectedVessel.isPositionAccuracyHigh, "Unknown", "High", "Low") }} / 
-              {{ FormatterHelper.getUndefTrueFalse(mapStateStore.selectedVessel.isRaimInUse, "Unknown", "Yes", "No") }} /
-              {{ mapStateStore.selectedVessel.fixingDeviceType }}
+              {{ FormatterHelper.getUndefTrueFalse(mapStateStore.selectedVessel.isPositionAccuracyHigh, "Unknown",
+                "High", "Low") }} /
+              {{ FormatterHelper.getUndefTrueFalse(mapStateStore.selectedVessel.isRaimInUse, "Unknown", "Yes", "No") }}
+              /
+              {{ FormatterHelper.getMappedName(mapStateStore.selectedVessel.fixingDeviceType,
+                mappingsStore.PositionFixingDeviceTypeMappings, "Unknown", "Not defined") }}
             </td>
           </tr>
           <tr>
             <td>COG / SOG</td>
             <td>
-              {{ FormatterHelper.getDegreeString(mapStateStore.selectedVessel.courseOverGround, 360, 2, "Unknown", "Not available") }} /
-              {{ `${mapStateStore.selectedVessel.speedOverGround} kn`  }}
+              {{ FormatterHelper.getDegreeString(mapStateStore.selectedVessel.courseOverGround, 360, 2, "Unknown",
+                "Not available") }} /
+              {{ `${mapStateStore.selectedVessel.speedOverGround} kn` }}
             </td>
           </tr>
           <tr>
             <td>True heading</td>
-            <td>{{ FormatterHelper.getDegreeString(mapStateStore.selectedVessel.trueHeading, 511, 2, "Unknown", "Not available") }}</td>
+            <td>{{ FormatterHelper.getDegreeString(mapStateStore.selectedVessel.trueHeading, 511, 2, "Unknown",
+              "Not available") }}</td>
           </tr>
           <tr>
             <td>ROT / Maneouvr </td>
             <td>
-              {{ mapStateStore.selectedVessel.rateOfTurn }} / {{ mapStateStore.selectedVessel.specialManoeuvreIndicator }}
+              {{ mapStateStore.selectedVessel.rateOfTurn }} / {{
+                FormatterHelper.getMappedName(mapStateStore.selectedVessel.specialManoeuvreIndicator,
+                  mappingsStore.SpecialManoeuvreIndicatorMappings, "Unknown", "Not defined") }}
             </td>
           </tr>
           <tr>
             <td>Length / Width / Draught </td>
             <td>
-              {{ FormatterHelper.getLength(mapStateStore.selectedVessel.dimensions, "Unknown") }} / 
+              {{ FormatterHelper.getLength(mapStateStore.selectedVessel.dimensions, "Unknown") }} /
               {{ FormatterHelper.getWidth(mapStateStore.selectedVessel.dimensions, "Unknown") }} /
-              {{ mapStateStore.selectedVessel.maximumPresentStaticDraught }}
+              {{ `${mapStateStore.selectedVessel.maximumPresentStaticDraught} m` }}
             </td>
           </tr>
           <tr>
@@ -79,7 +91,9 @@
             </td>
           </tr>
           <tr>
-            NAVIGATION
+            <td colspan="2" class="nav-circle">
+              <img :src="computedVesselIcon"></img>
+            </td>
           </tr>
         </tbody>
       </v-table>
@@ -93,7 +107,7 @@ import type { PickingInfo } from '@deck.gl/core';
 import type { VesselState } from '@/types/VesselState';
 import 'leaflet/dist/leaflet.css';
 import { VesselsLayer } from '@/common/VesselsLayer';
-import { onMounted, defineProps, watch } from "vue";
+import { computed, onMounted, watch } from "vue";
 
 import { FormatterHelper } from '@/common/FormatterHelper';
 
@@ -104,10 +118,42 @@ const mapInitialState: L.MapOptions = {
 
 import { mappingsStore } from '@/stores/mappingsStore';
 import { mapStateStore } from '@/stores/mapStateStore';
+import { VesselHelper } from '@/common/VesselHelper';
 
 const props = defineProps<{
   vessels: Iterable<VesselState>
 }>();
+
+const computedVesselIcon = computed<string>(() => {
+  let width = 50;
+  let height = 150;
+  let angle = 0;
+  let cog = 0;
+  let th = 0;
+  if (mapStateStore.selectedVessel != undefined && mapStateStore.selectedVessel.dimensions != undefined) {
+    width = (mapStateStore.selectedVessel.dimensions.c ?? 0) + (mapStateStore.selectedVessel.dimensions.d ?? 0);
+    height = (mapStateStore.selectedVessel.dimensions.a ?? 0) + (mapStateStore.selectedVessel.dimensions.b ?? 0);
+    angle = VesselHelper.getVesselAngle(mapStateStore.selectedVessel.trueHeading, mapStateStore.selectedVessel.courseOverGround);
+    cog = mapStateStore.selectedVessel.courseOverGround ?? 0;
+    th = mapStateStore.selectedVessel.trueHeading ?? 0;
+    th = 360 - (th == 511 ? 0 : th);
+    cog = 360 - (cog == 360 ? 0 : cog);
+  }
+  const coef = width / height;
+  const vslWidth = 150 * coef;
+  const paddingWidth = 100 - vslWidth / 2.0;
+  const svg = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">` +
+    `<g transform='rotate(${360 - angle} 100 100)' >${VesselHelper.getVesselSvgPath(150, vslWidth, paddingWidth, 25)}</g>` +
+    `<circle cx='100' cy='100' r='80' stroke="grey" stroke-width="1" fill="none" />` +
+    `<g transform='rotate(${360 - th} 100 100)'><line ${mapStateStore.selectedVessel?.trueHeading == 511 ? 'stroke-dasharray="4"' : ''} stroke="red" stroke-width='1' x1='100' y1='100' x2='100' y2='0'></line></g>` +
+    `<g transform='rotate(${360 - cog} 100 100)'><line ${mapStateStore.selectedVessel?.courseOverGround == 360 ? 'stroke-dasharray="4"' : ''} stroke="blue" stroke-width='1' x1='100' y1='100' x2='100' y2='0'></line></g>` +
+    `<text font-size="smaller" x="180" y="170" fill="red">th</text>` +
+    `<text font-size="smaller" x="180" y="180" fill="blue">cog</text>` +
+    `</svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+})
+
+
 
 onMounted(() => {
 
@@ -143,7 +189,8 @@ onMounted(() => {
     minZoom: 3,
   }).addTo(map);
 
-  var vesselsLayer = new VesselsLayer(mappingsStore.ShipTypeNameMappings, mappingsStore.NavigationStatusMappings);
+  const vesselsLayer = new VesselsLayer(mappingsStore.ShipTypeNameMappings, mappingsStore.NavigationStatusMappings);
+
 
   vesselsLayer.onVesselClicked = (info: PickingInfo<VesselState>, event: any) => {
     mapStateStore.selectedVessel = info.object;
@@ -155,7 +202,7 @@ onMounted(() => {
 
   watch(props, () => {
     vesselsLayer.updateLayerData(props.vessels);
-  })
+  });
 
 });
 </script>
@@ -173,6 +220,12 @@ onMounted(() => {
   top: 10vh !important;
   right: 0;
   margin-right: 0.5vw !important;
-  max-width: 35vw !important;
+  max-width: 45vw !important;
+}
+
+.nav-circle {
+  text-align: center;
+  padding: 20px !important;
+  height: auto;
 }
 </style>

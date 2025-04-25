@@ -38,6 +38,12 @@ export class DataStream {
             await this._connection.invoke("CommandGetNavigationStatusMappings").then((result: Record<number, string | undefined>) => {
                 Object.assign(mappingsStore.NavigationStatusMappings, result);
             });
+            await this._connection.invoke("CommandGetSpecialManoeuvreIndicatorMappings").then((result: Record<number, string | undefined>) => {
+                Object.assign(mappingsStore.SpecialManoeuvreIndicatorMappings, result);
+            });
+            await await this._connection.invoke("CommandGetPositionFixingDeviceTypeMappings").then((result: Record<number, string | undefined>) => {
+                Object.assign(mappingsStore.PositionFixingDeviceTypeMappings, result);
+            });
             await this._connection.invoke("CommandSendAllStatesByType", "Vessel");
         });
 

@@ -10,6 +10,8 @@ import movingStatus from "../assets/moving-status.svg";
 import pirateStatus from "../assets/pirate-status.svg";
 import questionStatus from "../assets/question-status.svg";
 import stoppedStatus from "../assets/stopped-status.svg";
+import { VesselHelper } from "@/common/VesselHelper";
+import { mapStateStore } from "@/stores/mapStateStore";
 
 type ExtendedVesselState = VesselState & {
     size: number;
@@ -32,7 +34,7 @@ export class VesselsLayer extends DeckLayer {
                     return null;
                 }
                 return object && {
-                    html: '<table>' +
+                    html: '<table class="map-tooltip">' +
                         `<tr><td>MMSI</td><td>${object.mmsi}</td></tr>` +
                         `<tr><td>Name</td><td>${object.name}</td></tr>` +
                         `<tr><td>Call Sign</td><td>${object.callSign}</td></tr>` +
@@ -41,8 +43,12 @@ export class VesselsLayer extends DeckLayer {
                         `<tr><td>COG/SOG</td><td>${FormatterHelper.getDegreeString(object.courseOverGround, 360)} / ${object.speedOverGround?.toFixed(2) + ' kn'}</td></tr>` +
                         `<tr><td>Lat/Lon</td><td>${FormatterHelper.getDegreeString(object.latitude, 91, 5)}/${FormatterHelper.getDegreeString(object.longitude, 181, 5)}</td></tr>` +
                         `<tr><td>True Heading</td><td>${FormatterHelper.getDegreeString(object.trueHeading, 511)}</td></tr>` +
-                        `<tr><td>Updated</td><td>${FormatterHelper.getLocalDate(object.updated)}</td></tr>` +
-                        '</table>'
+                        `<tr><td>Updated</td><td>${FormatterHelper.getLocalDate(object.updated, "Unknown")}</td></tr>` +
+                        '</table>',
+                    style: {
+                        "backgroundColor": "#f3e3c3",
+                        "border": "1px solid black"
+                    }
                 };
             },
             layers: [
@@ -71,7 +77,7 @@ export class VesselsLayer extends DeckLayer {
                 this._data.push({
                     ...vessel,
                     size: this._getVesselSize(vessel),
-                    angle: this._getVesselAngle(vessel),
+                    angle: VesselHelper.getVesselAngle(vessel.trueHeading, vessel.courseOverGround),
                     zoom: currentZoom,
                     color: this._getVesselColor(vessel),
                     icon: this._getVesselIcon(vessel, this._map.getBounds(), currentZoom),
@@ -80,7 +86,7 @@ export class VesselsLayer extends DeckLayer {
                 Object.assign(this._data[i], {
                     ...vessel,
                     size: this._getVesselSize(vessel),
-                    angle: this._getVesselAngle(vessel),
+                    angle: VesselHelper.getVesselAngle(vessel.trueHeading, vessel.courseOverGround),
                     zoom: currentZoom,
                     color: this._getVesselColor(vessel),
                     icon: this._getVesselIcon(vessel, this._map.getBounds(), currentZoom)
@@ -101,18 +107,7 @@ export class VesselsLayer extends DeckLayer {
         return height > 0 ? height : 15;
     }
 
-    private _getVesselAngle(d: VesselState): number {
-        let angle = 0;
-        if (d.trueHeading != undefined && d.trueHeading != 511) {
-            angle = d.trueHeading;
-        }
-        else {
-            if (d.courseOverGround != undefined && d.courseOverGround != 360) {
-                angle = d.courseOverGround;
-            }
-        }
-        return 360 - angle;
-    }
+
 
 
     private _createIconLayer() {
@@ -147,7 +142,6 @@ export class VesselsLayer extends DeckLayer {
         this.onVesselClicked?.(pickingInfo, event);
     }
 
-
     private _getVesselIcon(vessel: VesselState, bounds: LatLngBounds, zoom: number) {
 
         let url: string = questionStatus;
@@ -157,15 +151,9 @@ export class VesselsLayer extends DeckLayer {
                 const height = (vessel.dimensions.b ?? 0) + (vessel.dimensions.a ?? 0);
                 const width = (vessel.dimensions.c ?? 0) + (vessel.dimensions.d ?? 0);
 
-                if (height > 0 && width > 0) {
-                    const svg = `<svg width="${width + 2}" height="${height + 2}" xmlns="http://www.w3.org/2000/svg">` +
-                        `<path fill-rule='evenodd' d='` +
-                        `M ${1 + width / 2.0} 1 L ${1 + width} ${1 + height / 5.0} L ${width + 1} ${height + 1} L 1 ${1 + height} L 1 ${1 + height / 5.0}` +
-                        `' stroke-width='1'>` +
-                        ` <animate attributeType="XML" attributeName="fill"  values="#800;#f00;#800;#800" dur="0.8s" repeatCount="indefinite"/>` +
-                        `</path>` +
-                        `</svg>`
 
+                if (height > 0 && width > 0) {
+                    const svg = VesselHelper.getVesselIcon(height, width);
                     return {
                         url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
                         width: width + 2,

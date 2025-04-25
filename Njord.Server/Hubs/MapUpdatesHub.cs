@@ -47,7 +47,19 @@ namespace Njord.Server.Hubs
             return GetEnumNamesMappings<NavigationalStatus>(_ => (int)_);
         }
 
-        private Dictionary<int, string?> GetEnumNamesMappings<T>(Func<T, int> conv) where T : struct, Enum
+        public Dictionary<int, string?> CommandGetSpecialManoeuvreIndicatorMappings()
+        {
+            return GetEnumNamesMappings<SpecialManoeuvreIndicator>(_ => (int)_);
+        }
+
+        public Dictionary<int, string?> CommandGetPositionFixingDeviceTypeMappings()
+        {
+            return GetEnumNamesMappings<PositionFixingDeviceType>(_ => (int)_);
+        }
+
+
+
+        private static Dictionary<int, string?> GetEnumNamesMappings<T>(Func<T, int> conv) where T : struct, Enum
         {
             var values = Enum.GetValues<T>();
             var mappings = new Dictionary<int, string?>();
