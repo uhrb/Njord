@@ -3,7 +3,6 @@ using Njord.Ais.Messages;
 using Njord.Server.Grains.Abstracts;
 using Njord.Server.Grains.Interfaces;
 using Njord.Server.Grains.States;
-using Orleans.Runtime;
 
 namespace Njord.Server.Grains
 {
@@ -15,7 +14,8 @@ namespace Njord.Server.Grains
             ILogger<SearchAndRescueFixedWingAircraft> logger) : base(logger)
         {
             _state = state;
-            Map(_ => ProcessStandardSearchAndRescueReport((IStandardSARAircraftPositionReportMessage)_, _state), AisMessageType.StandardSearchAndRescueAircraftReport);   
+            Map(_ => ProcessStandardSearchAndRescueReport((IStandardSARAircraftPositionReportMessage)_, _state), AisMessageType.StandardSearchAndRescueAircraftReport);
+            Map(_ => ProcessStaticDataReport((IStaticDataReportMessage)_, _state), AisMessageType.StaticDataReport);
         }
     }
 }

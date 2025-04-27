@@ -1,22 +1,14 @@
-import { type ETA } from './ETA';
-import { type Dimensions } from './Dimensions';
+import type { ETA } from '@/types/ETA';
+import type { Dimensions } from '@/types/Dimensions';
+import type { MaritimeObjectState } from '@/types/MaritimeObjectState';
 
-export type VesselState = {
-    mmsi?: string;
-    longitude?: number;
-    latitude?: number;
-    isPositionAccuracyHigh?: boolean;
-    isRaimInUse?: boolean;
-    fixingDeviceType?: number;
-    courseOverGround?: number;
-    speedOverGround?: number;
+export interface VesselState extends MaritimeObjectState {
     rateOfTurn?: number;
     specialManoeuvreIndicator?: number;
     trueHeading?: number;
     navigationalStatus?: number;
     name?: string;
     callSign?: string;
-    updated?: string;
     destination?: string;
     imoNumber?: string;
     maximumPresentStaticDraught?: number;

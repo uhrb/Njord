@@ -1,4 +1,4 @@
-export enum SarType {
+export enum SarAircraftType {
     FixedWing,
     Helicopter
 }

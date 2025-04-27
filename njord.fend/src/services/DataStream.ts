@@ -4,14 +4,18 @@ import { HttpTransportType, HubConnection, HubConnectionBuilder } from "@microso
 import { mappingsStore } from "@/stores/mappingsStore";
 import { objectsStore } from "@/stores/objectsStore";
 import { useIntervalFn } from "@vueuse/core";
-import type { SarState } from "@/types/SarState";
-import { SarType } from "@/types/SarType";
+import type { SarAircraftState } from "@/types/SarAircraftState";
+import { SarAircraftType } from "@/types/SarAircraftType";
+import { MaritimeObjectType } from "@/types/MaritimeObjectType";
+import type { MaritimeObjectState } from "@/types/MaritimeObjectState";
 
 export class DataStream {
 
     _connection: HubConnection;
-    _vessels: Map<string, VesselState> = new Map();
-    _sar: Map<string, SarState> = new Map();
+    _dataMap : Map<MaritimeObjectType, Map<string, MaritimeObjectState>> = new Map([
+        [MaritimeObjectType.Vessel, new Map()],
+        [MaritimeObjectType.SarAircraft, new Map()]
+    ]);
 
     constructor() {
         this._connection = new HubConnectionBuilder()
@@ -30,10 +34,10 @@ export class DataStream {
                     this._parseVesselUpdate(objectId, objectState);
                     break;
                 case "SearchAndRescueFixedWingAircraft":
-                    this._parseSar(SarType.FixedWing, objectId, objectState);
+                    this._parseSar(SarAircraftType.FixedWing, objectId, objectState);
                     break;
                 case "SearchAndRescueHelicopter":
-                    this._parseSar(SarType.Helicopter, objectId, objectState);
+                    this._parseSar(SarAircraftType.Helicopter, objectId, objectState);
                     break;
                 default:
                     break;
@@ -49,34 +53,38 @@ export class DataStream {
             await this._connection.invoke("CommandGetSpecialManoeuvreIndicatorMappings").then((result: Record<number, string | undefined>) => {
                 Object.assign(mappingsStore.SpecialManoeuvreIndicatorMappings, result);
             });
-            await await this._connection.invoke("CommandGetPositionFixingDeviceTypeMappings").then((result: Record<number, string | undefined>) => {
+            await this._connection.invoke("CommandGetPositionFixingDeviceTypeMappings").then((result: Record<number, string | undefined>) => {
                 Object.assign(mappingsStore.PositionFixingDeviceTypeMappings, result);
             });
             await this._connection.invoke("CommandSendAllStatesByTypes", ["Vessel", "SearchAndRescueFixedWingAircraft", "SearchAndRescueHelicopter"]);
         });
 
         useIntervalFn(() => {
-            objectsStore.vessels = this._vessels.values();
-            objectsStore.vesselsCount = this._vessels.size;
-            objectsStore.sars = this._sar.values();
-            objectsStore.sarsCount = this._sar.size;
+            for(const kv of this._dataMap) {
+                const key = kv[0];
+                const val = kv[1];
+                objectsStore.objects.set(key, val.values());
+                objectsStore.objectsAmount.set(key, val.size);
+            }
         }, 1000)
     }
 
     private _parseVesselUpdate(objectId: string, objectState: any) {
         var vsl: VesselState = {
             mmsi: objectId,
+            objectType: MaritimeObjectType.Vessel,
             ...objectState,
         }
-        this._vessels.set(objectId, vsl);
+        this._dataMap.get(MaritimeObjectType.Vessel)?.set(objectId, vsl);
     }
 
-    private _parseSar(objectType: SarType, objectId: string, objectState: any) {
-        var sar = {
+    private _parseSar(objectType: SarAircraftType, objectId: string, objectState: any) {
+        var sar : SarAircraftState = {
             mmsi: objectId,
-            type: objectType,
+            objectType: MaritimeObjectType.SarAircraft,
+            aircraftType: objectType,
             ...objectState
         }
-        this._sar.set(objectId, sar);
+        this._dataMap.get(MaritimeObjectType.SarAircraft)?.set(objectId, sar);
     }
 }

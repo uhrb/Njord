@@ -1,5 +1,5 @@
-import type { VesselState } from "@/types/VesselState";
+import type { MaritimeObjectState } from "@/types/MaritimeObjectState";
 import {reactive} from "vue";
 export const mapStateStore = reactive<{
-    selectedVessel? : VesselState;
+    selectedObject? : MaritimeObjectState;
 }>({})

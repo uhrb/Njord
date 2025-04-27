@@ -2,18 +2,13 @@
   <v-app>
     <v-app-bar>
       <template v-slot:append>
-        <v-btn @click="objectsStore.vesselsVisibility = !objectsStore.vesselsVisibility">
-          Vessels&nbsp;{{ objectsStore.vesselsCount }}
-        </v-btn>
-        <v-btn @click="objectsStore.sarsVisibility = !objectsStore.sarsVisibility">
-          SAR&nbsp;{{ objectsStore.sarsCount }}
-        </v-btn>
-
+         <v-btn v-for="item in objectsStore.objectsAmount" @click="setLayerVisibility(item[0])">
+            {{ item[0] }} {{ item[1] }}
+         </v-btn>
       </template>
     </v-app-bar>
     <v-main>
-      <SeaMap :vessels="objectsStore.vessels" :sar-fixed-wing="objectsStore.sars"
-        :sars-visibility="objectsStore.sarsVisibility" :vessels-visibity="objectsStore.vesselsVisibility"></SeaMap>
+      <SeaMap></SeaMap>
     </v-main>
   </v-app>
 </template>
@@ -21,5 +16,10 @@
 import SeaMap from "@/components/SeaMap.vue";
 
 import { objectsStore } from "@/stores/objectsStore";
+import type { MaritimeObjectType } from "@/types/MaritimeObjectType";
+
+function setLayerVisibility(type: MaritimeObjectType) {
+  objectsStore.objectsVisibility.set(type, !objectsStore.objectsVisibility.get(type));
+}
 
 </script>

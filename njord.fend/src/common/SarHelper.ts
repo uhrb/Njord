@@ -1,16 +1,16 @@
 import sarFixedIcon from "@/assets/aircraft.svg";
 import sarHelicopter from "@/assets/helicopter.svg";
-import { SarType } from "@/types/SarType";
+import { SarAircraftType } from "@/types/SarAircraftType";
 
-class SarHelperImplementation {
+class SarAircraftHelperImplementation {
     public getColor() : [number, number, number, number] {
         return [255, 49, 37, 255];
     }
 
-    public getIcon(sarType: SarType) {
+    public getIcon(sarType: SarAircraftType) {
         let url = sarFixedIcon;
         switch(sarType) {
-            case SarType.Helicopter:
+            case SarAircraftType.Helicopter:
                 url = sarHelicopter;
                 break;
             default:
@@ -27,4 +27,4 @@ class SarHelperImplementation {
     }
 }
 
-export const SarHelper: SarHelperImplementation = new SarHelperImplementation();
+export const SarAircraftHelper: SarAircraftHelperImplementation = new SarAircraftHelperImplementation();

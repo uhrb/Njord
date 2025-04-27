@@ -1,9 +1,8 @@
-import type { SarType } from "@/types/SarType";
+import type { MaritimeObjectType } from "@/types/MaritimeObjectType";
 
-export type SarState = {
-    type: SarType;
-    altitude?: number;
-    isAltitudeSensorTypeBarometric?: boolean;
+export interface MaritimeObjectState {
+    objectType: MaritimeObjectType;
+    mmsi: string;
     longitude?: number;
     latitude?: number;
     isPositionAccuracyHigh?: boolean;

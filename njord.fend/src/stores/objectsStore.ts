@@ -1,18 +1,21 @@
-import type { SarState } from "@/types/SarState";
-import type { VesselState } from "@/types/VesselState";
+import type { MaritimeObjectState } from "@/types/MaritimeObjectState";
+import { MaritimeObjectType } from "@/types/MaritimeObjectType";
 import {reactive} from "vue";
 export const objectsStore = reactive<{
-    vessels: Iterable<VesselState>
-    vesselsCount: number,
-    sars: Iterable<SarState>,
-    sarsCount: number,
-    sarsVisibility: boolean,
-    vesselsVisibility: boolean,
+    objects: Map<MaritimeObjectType, Iterable<MaritimeObjectState>>,
+    objectsAmount: Map<MaritimeObjectType, number>,
+    objectsVisibility: Map<MaritimeObjectType, boolean>
 }>({
-    vessels: new Map<string, VesselState>().values(),
-    vesselsCount: 0,
-    sars: new Map<string, SarState>().values(),
-    sarsCount : 0,
-    sarsVisibility: true,
-    vesselsVisibility: true
+    objects: new Map<MaritimeObjectType, MaritimeObjectState[]>([
+        [MaritimeObjectType.Vessel, []],
+        [MaritimeObjectType.SarAircraft, []]
+    ]),
+    objectsAmount: new Map<MaritimeObjectType, number>([
+        [MaritimeObjectType.Vessel, 0],
+        [MaritimeObjectType.SarAircraft, 0]
+    ]),
+    objectsVisibility: new Map<MaritimeObjectType, boolean>([
+        [MaritimeObjectType.Vessel, true],
+        [MaritimeObjectType.SarAircraft, true]
+    ]),
 })

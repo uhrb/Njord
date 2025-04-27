@@ -26,5 +26,20 @@ namespace Njord.Server.Grains.Abstracts
 
             await state.WriteStateAsync();
         }
+
+        protected async Task ProcessStaticDataReport<T>(IStaticDataReportMessage _, IPersistentState<T> state) where T: AbstractSearchAndRescueState
+        {
+            if (false == _.IsValid()) return;
+
+            if(_.IsPartA)
+            {
+                state.State.Name = _.Name;
+            } else
+            {
+                state.State.CallSign = _.CallSign;
+            }
+
+            await state.WriteStateAsync();
+        }
     }
 }
