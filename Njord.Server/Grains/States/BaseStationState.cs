@@ -5,7 +5,7 @@ namespace Njord.Server.Grains.States
 {
     [GenerateSerializer]
     [Alias("Njord.Server.Grains.States.BaseStationState")]
-    public record BaseStationState : AbstractPositionState
+    public record BaseStationState : AbstractStationState
     {
     }
 }

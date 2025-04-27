@@ -9,6 +9,27 @@
                 </td>
             </tr>
             <tr>
+                <td>Alarm</td>
+                <td>
+                    {{ FormatterHelper.getUndefTrueFalse(props.object.atoNStatus?.isAlarmState, "Unknown", "Alarmed",
+                    "Idle") }}
+                </td>
+            </tr>
+            <tr>
+                <td>Light</td>
+                <td>
+                    {{ FormatterHelper.getMappedName(props.object.atoNStatus?.lightsState,
+                        mappingsStore.AidsToNavigationLightsStatusMappings, "Unknown", "Undefined") }}
+                </td>
+            </tr>
+            <tr>
+                <td>RACON</td>
+                <td>
+                    {{ FormatterHelper.getMappedName(props.object.atoNStatus?.raconState,
+                        mappingsStore.AidsToNavigationRACONStatusMappings, "Unknown", "Undefined") }}
+                </td>
+            </tr>
+            <tr>
                 <td>Latitude / Longitude</td>
                 <td>
                     {{ FormatterHelper.getDegreeString(props.object.latitude, 91, 4, "Unknown",
@@ -29,12 +50,13 @@
                 </td>
             </tr>
             <tr>
-                <td>Length / Width  </td>
+                <td>Length / Width </td>
                 <td>
                     {{ FormatterHelper.getLength(props.object.dimensions, "Unknown") }} /
-                    {{ FormatterHelper.getWidth(props.object.dimensions, "Unknown") }} 
+                    {{ FormatterHelper.getWidth(props.object.dimensions, "Unknown") }}
                 </td>
             </tr>
+
             <tr>
                 <td>Updated</td>
                 <td>

@@ -11,7 +11,7 @@ namespace Njord.Server.Grains.Abstracts
         {
         }
 
-        protected async Task ProcessLongRange<T>(ILongRangeAisBroadcastMessage _, IPersistentState<T> state) where T : AbstractPositionState
+        protected async Task ProcessLongRange<T>(ILongRangeAisBroadcastMessage _, IPersistentState<T> state) where T : AbstractStationState
         {
             if (false == _.IsValid()) return;
 
@@ -20,7 +20,7 @@ namespace Njord.Server.Grains.Abstracts
             await state.WriteStateAsync();
         }
 
-        protected async Task ProcessGnssBinaryMessage<T>(IGnssBroadcastBinaryMessage _, IPersistentState<T> state) where T : AbstractPositionState
+        protected async Task ProcessGnssBinaryMessage<T>(IGnssBroadcastBinaryMessage _, IPersistentState<T> state) where T : AbstractStationState
         {
             if (false == _.IsValid()) return;
 
@@ -30,12 +30,28 @@ namespace Njord.Server.Grains.Abstracts
             await state.WriteStateAsync();
         }
 
-        protected async Task ProcessBaseStationReport<T>(IBaseStationReportMessage _, IPersistentState<T> state) where T : AbstractPositionState
+        protected async Task ProcessBaseStationReport<T>(IBaseStationReportMessage _, IPersistentState<T> state) where T : AbstractStationState
         {
             if (false == _.IsValid()) return;
 
             UpdateFromPositionWithAccuracyMessage(_, state);
             state.State.FixingDeviceType = _.FixingDeviceType;
+
+            await state.WriteStateAsync();
+        }
+
+        protected async Task ProcessStaticDataReport<T>(IStaticDataReportMessage _, IPersistentState<T> state) where T: AbstractStationState
+        {
+            if(false == _.IsValid()) return;
+
+            if (_.IsPartA)
+            {
+                state.State.Name = _.Name;
+            }
+            else
+            {
+                state.State.CallSign = _.CallSign;
+            }
 
             await state.WriteStateAsync();
         }

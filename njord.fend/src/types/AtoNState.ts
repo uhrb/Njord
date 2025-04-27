@@ -10,6 +10,6 @@ export interface AtoNState extends MaritimeObjectState {
     dimensions?: Dimensions;
     isVirtualDevice?: boolean;
     typeOfAidsToNavigation?: number;
-    atonStatus?: AtoNStatus;
+    atoNStatus?: AtoNStatus;
     isOffPosition?: boolean;
 }

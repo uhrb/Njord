@@ -8,7 +8,7 @@
         /// <summary>
         /// Not equepped with lights or light equipment is not monitored
         /// </summary>
-        NoLightsOrNoMoniring = 0,
+        NoLightsOrNoMonitoring = 0,
 
         /// <summary>
         /// Light is on

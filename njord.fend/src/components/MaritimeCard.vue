@@ -50,7 +50,7 @@ import StationTitle from '@/components/CardParts/Station/StationTitle.vue';
 import type { StationState } from '@/types/BaseStationState';
 import StationSubtitle from '@/components/CardParts/Station/StationSubtitle.vue';
 import StationText from '@/components/CardParts/Station/StationText.vue';
-import AtonTitle from '@/components/CardParts/AtoN/AtonTitle.vue';
+import AtonTitle from '@/components/CardParts/AtoN/AtoNTitle.vue';
 import type { AtoNState } from '@/types/AtoNState';
 import AtoNSubtitle from '@/components/CardParts/AtoN/AtoNSubtitle.vue';
 import AtoNText from '@/components/CardParts/AtoN/AtoNText.vue';

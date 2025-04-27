@@ -4,9 +4,15 @@ export const mappingsStore = reactive<{
     NavigationStatusMappings: Record<number, string | undefined>;
     SpecialManoeuvreIndicatorMappings:Record<number, string | undefined>;
     PositionFixingDeviceTypeMappings:Record<number, string | undefined>;
+    AidsToNavigationTypeMappings:Record<number, string | undefined>;
+    AidsToNavigationLightsStatusMappings:Record<number, string | undefined>;
+    AidsToNavigationRACONStatusMappings:Record<number, string | undefined>;
 }>({
     ShipTypeNameMappings: {},
     NavigationStatusMappings: {},
     SpecialManoeuvreIndicatorMappings : {},
-    PositionFixingDeviceTypeMappings: {}
+    PositionFixingDeviceTypeMappings: {},
+    AidsToNavigationTypeMappings: {},
+    AidsToNavigationLightsStatusMappings: {},
+    AidsToNavigationRACONStatusMappings: {}
 })

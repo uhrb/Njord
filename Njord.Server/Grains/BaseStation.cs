@@ -3,7 +3,6 @@ using Njord.Ais.Messages;
 using Njord.Server.Grains.Abstracts;
 using Njord.Server.Grains.Interfaces;
 using Njord.Server.Grains.States;
-using Orleans.Runtime;
 
 namespace Njord.Server.Grains
 {
@@ -21,8 +20,7 @@ namespace Njord.Server.Grains
             Map(_ => ProcessGnssBinaryMessage((IGnssBroadcastBinaryMessage)_, _state), AisMessageType.GnssBroadcastBinaryMessage);
 
             Map(_ => ProcessLongRange((ILongRangeAisBroadcastMessage)_, _state), AisMessageType.LongRangeAisBroadcastMessage);
+            Map(_ => ProcessStaticDataReport((IStaticDataReportMessage) _, _state), AisMessageType.StaticDataReport);
         }
-
-       
     }
 }

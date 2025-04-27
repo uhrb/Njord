@@ -1,7 +1,6 @@
 ﻿using Njord.Ais.Enums;
 using Njord.Ais.Messages;
 using Njord.Server.Grains.Interfaces;
-using Orleans.Runtime;
 using Njord.Server.Grains.Abstracts;
 using Njord.Server.Grains.States;
 
@@ -11,7 +10,7 @@ namespace Njord.Server.Grains
     {
         private readonly IPersistentState<CoastStationState> _state;
 
-        public CoastStation([PersistentState(nameof(CoastStation))] IPersistentState<CoastStationState> state, ILogger<BaseStation> logger) : base(logger)
+        public CoastStation([PersistentState(nameof(CoastStation))] IPersistentState<CoastStationState> state, ILogger<CoastStation> logger) : base(logger)
         {
             _state = state;
 
@@ -21,6 +20,7 @@ namespace Njord.Server.Grains
             Map(_ => ProcessGnssBinaryMessage((IGnssBroadcastBinaryMessage)_, _state), AisMessageType.GnssBroadcastBinaryMessage);
 
             Map(_ => ProcessLongRange((ILongRangeAisBroadcastMessage)_, _state), AisMessageType.LongRangeAisBroadcastMessage);
+            Map(_ => ProcessStaticDataReport((IStaticDataReportMessage)_, _state), AisMessageType.StaticDataReport);
         }
     }
 }

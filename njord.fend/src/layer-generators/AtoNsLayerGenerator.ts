@@ -38,11 +38,9 @@ export class AtonSLayerGenerator implements IconLayerGenerator<AtoNState> {
 
     generateViewState(obj: AtoNState, zoom: number, bounds: LatLngBounds): MaritimeObjectViewState<AtoNState> {
 
-        const size = VesselHelper.getVesselSize(obj.dimensions);
-
         return {
             object: obj,
-            size: size,
+            size: VesselHelper.getVesselSize(obj.dimensions),
             angle: 0,
             color: [0, 0, 0, 255],
             icon: SvgHelper.getAtoNIcon(obj, bounds, zoom),

@@ -73,17 +73,26 @@ export class DataStream {
             }
         });
         this._connection.start().then(async () => {
-            await this._connection.invoke("CommandGetShipTypeMappings").then((result: Record<number, string | undefined>) => {
+            await this._connection.invoke("GetEnumNamesMappings", "TypeOfShipAndCargoType").then((result: Record<number, string | undefined>) => {
                 Object.assign(mappingsStore.ShipTypeNameMappings, result);
             });
-            await this._connection.invoke("CommandGetNavigationStatusMappings").then((result: Record<number, string | undefined>) => {
+            await this._connection.invoke("GetEnumNamesMappings", "NavigationalStatus").then((result: Record<number, string | undefined>) => {
                 Object.assign(mappingsStore.NavigationStatusMappings, result);
             });
-            await this._connection.invoke("CommandGetSpecialManoeuvreIndicatorMappings").then((result: Record<number, string | undefined>) => {
+            await this._connection.invoke("GetEnumNamesMappings", "SpecialManoeuvreIndicator").then((result: Record<number, string | undefined>) => {
                 Object.assign(mappingsStore.SpecialManoeuvreIndicatorMappings, result);
             });
-            await this._connection.invoke("CommandGetPositionFixingDeviceTypeMappings").then((result: Record<number, string | undefined>) => {
+            await this._connection.invoke("GetEnumNamesMappings", "PositionFixingDeviceType").then((result: Record<number, string | undefined>) => {
                 Object.assign(mappingsStore.PositionFixingDeviceTypeMappings, result);
+            });
+            await this._connection.invoke("GetEnumNamesMappings", "AidsToNavigationType").then((result: Record<number, string | undefined>) => {
+                Object.assign(mappingsStore.AidsToNavigationTypeMappings, result);
+            });
+            await this._connection.invoke("GetEnumNamesMappings", "AidsToNavigationLightsStatus").then((result: Record<number, string | undefined>) => {
+                Object.assign(mappingsStore.AidsToNavigationLightsStatusMappings, result);
+            });
+            await this._connection.invoke("GetEnumNamesMappings", "AidsToNavigationRACONStatus").then((result: Record<number, string | undefined>) => {
+                Object.assign(mappingsStore.AidsToNavigationRACONStatusMappings, result);
             });
             await this._connection.invoke("CommandSendAllStatesByTypes", [
                 "Vessel", 
@@ -139,14 +148,13 @@ export class DataStream {
         this._dataMap.get(MaritimeObjectType.Station)?.set(objectId, station);
     }
 
-    private _parseAtoN(atonType: AtoNType, objectId: string, obectState: any) {
+    private _parseAtoN(atonType: AtoNType, objectId: string, objectState: any) {
         var aton: AtoNState = {
             mmsi: objectId,
             objectType: MaritimeObjectType.AtoN,
             atonType: atonType,
-            ...obectState
+            ...objectState
         }
-
         this._dataMap.get(MaritimeObjectType.AtoN)?.set(objectId, aton);
     }
 }

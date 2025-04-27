@@ -1,6 +1,6 @@
 
 export interface AtoNStatus {
     isAlarmState: boolean;
-    lightState: number;
+    lightsState: number;
     raconState: number;
 }

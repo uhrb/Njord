@@ -10,11 +10,21 @@ namespace Njord.Server.Hubs
     {
         private readonly ILogger<MapUpdatesHub> _logger;
         private readonly IGrainStorageWithQueries _queries;
+        private readonly Dictionary<string, Type> _enums;
 
         public MapUpdatesHub(ILogger<MapUpdatesHub> logger, IGrainStorageWithQueries queries)
         {
             _logger = logger;
             _queries = queries;
+            _enums = new Dictionary<string, Type> {
+                { nameof(TypeOfShipAndCargoType), typeof(TypeOfShipAndCargoType) },
+                { nameof(NavigationalStatus), typeof(NavigationalStatus) },
+                { nameof(SpecialManoeuvreIndicator), typeof(SpecialManoeuvreIndicator) },
+                { nameof(PositionFixingDeviceType), typeof(PositionFixingDeviceType) },
+                { nameof(AidsToNavigationType), typeof(AidsToNavigationType) },
+                { nameof(AidsToNavigationLightsStatus), typeof(AidsToNavigationLightsStatus) },
+                { nameof(AidsToNavigationRACONStatus), typeof(AidsToNavigationRACONStatus) },
+            };
         }
 
         public override Task OnConnectedAsync()
@@ -40,34 +50,18 @@ namespace Njord.Server.Hubs
             }
         }
 
-        public Dictionary<int, string?> CommandGetShipTypeMappings()
+        public Dictionary<object, string?> GetEnumNamesMappings(string name)
         {
-            return GetEnumNamesMappings<TypeOfShipAndCargoType>(_ => (int)_);
-        }
-
-        public Dictionary<int, string?> CommandGetNavigationStatusMappings()
-        {
-            return GetEnumNamesMappings<NavigationalStatus>(_ => (int)_);
-        }
-
-        public Dictionary<int, string?> CommandGetSpecialManoeuvreIndicatorMappings()
-        {
-            return GetEnumNamesMappings<SpecialManoeuvreIndicator>(_ => (int)_);
-        }
-
-        public Dictionary<int, string?> CommandGetPositionFixingDeviceTypeMappings()
-        {
-            return GetEnumNamesMappings<PositionFixingDeviceType>(_ => (int)_);
-        }
-
-        private static Dictionary<int, string?> GetEnumNamesMappings<T>(Func<T, int> conv) where T : struct, Enum
-        {
-            var values = Enum.GetValues<T>();
-            var mappings = new Dictionary<int, string?>();
-            foreach (var value in values)
+            if(false == _enums.TryGetValue(name, out Type? enumType))
             {
-                var name = Enum.GetName(value);
-                mappings.Add(conv(value), SplitTitleCase(name));
+                return [];
+            }
+            var values = Enum.GetValuesAsUnderlyingType(enumType);
+            var mappings = new Dictionary<object, string?>();
+            foreach (var enumEntryValue in values)
+            {
+                var enumEntryName = Enum.GetName(enumType,enumEntryValue);
+                mappings.Add(enumEntryValue, SplitTitleCase(enumEntryName));
             }
 
             return mappings;
