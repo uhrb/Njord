@@ -1,8 +1,7 @@
 import { NavigationHelper } from "@/common/NavigationHelper";
 import { SvgHelper } from "@/common/SvgHelper";
 import { VesselHelper } from "@/common/VesselHelper";
-import type { IconLayerGenerator } from "@/types/IconLayerGenerator";
-import type { MaritimeObjectState } from "@/types/MaritimeObjectState";
+import type { IconLayerGenerator } from "@/layer-generators/IconLayerGenerator";
 import type { MaritimeObjectViewState } from "@/types/MaritimeObjectViewState";
 import type { VesselState } from "@/types/VesselState";
 import { IconLayer, type Layer, type PickingInfo } from "deck.gl";

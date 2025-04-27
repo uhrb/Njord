@@ -20,18 +20,22 @@ const mapInitialState: L.MapOptions = {
 import { mappingsStore } from '@/stores/mappingsStore';
 import { mapStateStore } from '@/stores/mapStateStore';
 import { MaritimeObjectType } from '@/types/MaritimeObjectType';
-import type { IconLayerGenerator } from '@/types/IconLayerGenerator';
+import type { IconLayerGenerator } from '@/layer-generators/IconLayerGenerator';
 import type { MaritimeObjectState } from '@/types/MaritimeObjectState';
-import { VesselsLayerGenerator } from '@/common/VesselsLayerGenerator';
-import { SarAircraftsLayerGenerator } from '@/common/SarAircraftsLayerGenerator';
+import { VesselsLayerGenerator } from '@/layer-generators/VesselsLayerGenerator';
+import { SarAircraftsLayerGenerator } from '@/layer-generators/SarAircraftsLayerGenerator';
 import { objectsStore } from '@/stores/objectsStore';
 
 import MaritimeCard from '@/components/MaritimeCard.vue';
+import { StationsLayerGenerator } from '@/layer-generators/StationsLayerGenerator';
+import { AtonSLayerGenerator } from '@/layer-generators/AtoNsLayerGenerator';
 
 
 const generators = new Map<MaritimeObjectType, IconLayerGenerator<MaritimeObjectState>>([
   [MaritimeObjectType.Vessel, new VesselsLayerGenerator()],
-  [MaritimeObjectType.SarAircraft, new SarAircraftsLayerGenerator()]
+  [MaritimeObjectType.SarAircraft, new SarAircraftsLayerGenerator()],
+  [MaritimeObjectType.Station, new StationsLayerGenerator()],
+  [MaritimeObjectType.AtoN, new AtonSLayerGenerator()]
 ]);
 
 const mariTimeLayer = new MaritimeLayer(generators, mappingsStore.ShipTypeNameMappings, mappingsStore.NavigationStatusMappings);

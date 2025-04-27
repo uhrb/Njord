@@ -8,13 +8,19 @@ import type { SarAircraftState } from "@/types/SarAircraftState";
 import { SarAircraftType } from "@/types/SarAircraftType";
 import { MaritimeObjectType } from "@/types/MaritimeObjectType";
 import type { MaritimeObjectState } from "@/types/MaritimeObjectState";
+import { StationType } from "@/types/StationType";
+import type { StationState } from "@/types/BaseStationState";
+import { AtoNType } from "@/types/AtoNType";
+import type { AtoNState } from "@/types/AtoNState";
 
 export class DataStream {
 
     _connection: HubConnection;
     _dataMap : Map<MaritimeObjectType, Map<string, MaritimeObjectState>> = new Map([
         [MaritimeObjectType.Vessel, new Map()],
-        [MaritimeObjectType.SarAircraft, new Map()]
+        [MaritimeObjectType.SarAircraft, new Map()],
+        [MaritimeObjectType.Station, new Map()],
+        [MaritimeObjectType.AtoN, new Map()]
     ]);
 
     constructor() {
@@ -39,6 +45,29 @@ export class DataStream {
                 case "SearchAndRescueHelicopter":
                     this._parseSar(SarAircraftType.Helicopter, objectId, objectState);
                     break;
+                case "BaseStation":
+                    this._parseStation(StationType.BaseStation, objectId, objectState);
+                    break;
+                case "CoastStation":
+                    this._parseStation(StationType.CoastStation, objectId, objectState);
+                    break;
+                case "PilotStation":
+                    this._parseStation(StationType.PilotStation, objectId, objectState);
+                    break;
+                case "PortStation":
+                    this._parseStation(StationType.PortStation, objectId, objectState);
+                    break;
+                case "RepeaterStation":
+                    this._parseStation(StationType.RepeaterStation, objectId, objectState);
+                    break;
+                case "MobileAidsToNavigation":
+                    this._parseAtoN(AtoNType.Mobile, objectId, objectState);
+                    break;
+                case "PhysicalAidsToNavigation":
+                    this._parseAtoN(AtoNType.Physical, objectId, objectState);
+                    break;
+                case "VirtualAidsToNavigation":
+                    this._parseAtoN(AtoNType.Virtual, objectId, objectState);
                 default:
                     break;
             }
@@ -56,7 +85,19 @@ export class DataStream {
             await this._connection.invoke("CommandGetPositionFixingDeviceTypeMappings").then((result: Record<number, string | undefined>) => {
                 Object.assign(mappingsStore.PositionFixingDeviceTypeMappings, result);
             });
-            await this._connection.invoke("CommandSendAllStatesByTypes", ["Vessel", "SearchAndRescueFixedWingAircraft", "SearchAndRescueHelicopter"]);
+            await this._connection.invoke("CommandSendAllStatesByTypes", [
+                "Vessel", 
+                "SearchAndRescueFixedWingAircraft", 
+                "SearchAndRescueHelicopter", 
+                "BaseStation", 
+                "CoastStation", 
+                "PilotStation",
+                "PortStation",
+                "RepeaterStation",
+                "MobileAidsToNavigation",
+                "PhysicalAidsToNavigation",
+                "VirtualAidsToNavigation"
+            ]);
         });
 
         useIntervalFn(() => {
@@ -86,5 +127,26 @@ export class DataStream {
             ...objectState
         }
         this._dataMap.get(MaritimeObjectType.SarAircraft)?.set(objectId, sar);
+    }
+
+    private _parseStation(baseStationType: StationType, objectId: string, objectState: any) {
+        var station: StationState = {
+            mmsi: objectId,
+            objectType: MaritimeObjectType.Station,
+            baseStationType: baseStationType,
+            ... objectState
+        }
+        this._dataMap.get(MaritimeObjectType.Station)?.set(objectId, station);
+    }
+
+    private _parseAtoN(atonType: AtoNType, objectId: string, obectState: any) {
+        var aton: AtoNState = {
+            mmsi: objectId,
+            objectType: MaritimeObjectType.AtoN,
+            atonType: atonType,
+            ...obectState
+        }
+
+        this._dataMap.get(MaritimeObjectType.AtoN)?.set(objectId, aton);
     }
 }

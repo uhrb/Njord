@@ -1,7 +1,9 @@
 import movingStatus from "@/assets/moving-status.svg";
 import nucStatus from "@/assets/nuc-status.svg";
 import questionStatus from "@/assets/question-status.svg";
+import svgAtoN from "@/assets/buoy.svg";
 import stoppedStatus from "@/assets/stopped-status.svg";
+import type { AtoNState } from "@/types/AtoNState";
 import type { VesselState } from "@/types/VesselState";
 import type { LatLngBounds } from "leaflet";
 
@@ -27,6 +29,45 @@ class SvgHelperImplementation {
             `L ${width + paddingWidth} ${height + paddingHeigth} L ${paddingWidth} ${paddingHeigth + height} L ${paddingWidth} ${paddingHeigth + height / 5.0}` +
             `' stroke-width='1'>` +
             `</path>`
+    }
+
+    public getAtonSvgPath(height: number, width: number, paddingWidth: number, paddingHeigth: number) {
+        return `<rectangle x='${paddingWidth}' y='${paddingHeigth}' height='${height}' width='${width}' stroke-width='1'></rectangle>`;
+    }
+
+    public getAtoNIcon(aton: AtoNState, bounds: LatLngBounds, zoom: number) {
+
+        let url: string = svgAtoN;
+
+        if (zoom >= 14 && bounds.contains({ lat: aton.latitude!, lng: aton.longitude! })) {
+            if (aton.dimensions != undefined) {
+                let height = (aton.dimensions.b ?? 0) + (aton.dimensions.a ?? 0);
+                let width = (aton.dimensions.c ?? 0) + (aton.dimensions.d ?? 0);
+
+                if (height > 10 && width > 10) {
+                    const svg = `<svg width="${width + 2}" height="${height + 2}" xmlns="http://www.w3.org/2000/svg">
+                            ${this.getAtonSvgPath(height, width, 1, 1)}
+                            </svg>`
+                    return {
+                        url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
+                        width: width + 2,
+                        height: height + 2,
+                        anchorY: aton.dimensions!.a!,
+                        anchorX: aton.dimensions!.c!,
+                        mask: false,
+                    };
+                }
+            }
+        }
+
+        return {
+            url: url,
+            width: 48,
+            height: 48,
+            anchorY: 24,
+            anchorX: 24,
+            mask: false,
+        };
     }
 
     public getVesselIcon(vessel: VesselState, bounds: LatLngBounds, zoom: number) {
@@ -89,7 +130,7 @@ class SvgHelperImplementation {
         };
     }
 
-    public extractSvgRaw(raw: string) : [ string, number, number ] {
+    public extractSvgRaw(raw: string): [string, number, number] {
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(raw, 'image/svg+xml');
         const svg = svgDoc.documentElement;

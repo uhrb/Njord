@@ -1,14 +1,14 @@
 import { NavigationHelper } from "@/common/NavigationHelper";
 import { SarAircraftHelper } from "@/common/SarHelper";
-import type { IconLayerGenerator } from "@/types/IconLayerGenerator";
+import type { IconLayerGenerator } from "@/layer-generators/IconLayerGenerator";
 import type { MaritimeObjectViewState } from "@/types/MaritimeObjectViewState";
 import type { SarAircraftState } from "@/types/SarAircraftState";
-import { IconLayer, type Layer, type Viewport } from "deck.gl";
+import { IconLayer, type Layer, type PickingInfo, type Viewport } from "deck.gl";
 import type { LatLngBounds } from "leaflet";
 import type { MjolnirEvent } from "mjolnir.js";
 
 export class SarAircraftsLayerGenerator implements IconLayerGenerator<SarAircraftState> {
-    generateIconLayer(data: MaritimeObjectViewState<SarAircraftState>[] | undefined, visible: boolean, onClick: (pickingInfo: { color: Uint8Array | null; layer: Layer | null; sourceLayer?: Layer | null; viewport?: Viewport; index: number; picked: boolean; object?: MaritimeObjectViewState<SarAircraftState> | undefined; x: number; y: number; pixel?: [number, number]; coordinate?: number[]; devicePixel?: [number, number]; pixelRatio: number; }, event: MjolnirEvent) => void): Layer {
+    generateIconLayer(data: MaritimeObjectViewState<SarAircraftState>[] | undefined, visible: boolean, onClick: (pickingInfo: PickingInfo<MaritimeObjectViewState<SarAircraftState>>, event: MjolnirEvent) => void): Layer {
         return new IconLayer<MaritimeObjectViewState<SarAircraftState>>({
             id: `sar-layer`,
             data: data,

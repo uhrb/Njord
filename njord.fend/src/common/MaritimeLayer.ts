@@ -4,7 +4,7 @@ import { DeckLayer } from "./community";
 import type { MaritimeObjectViewState } from "@/types/MaritimeObjectViewState";
 import type { MaritimeObjectType } from "@/types/MaritimeObjectType";
 import type { MaritimeObjectState } from "@/types/MaritimeObjectState";
-import type { IconLayerGenerator } from "@/types/IconLayerGenerator";
+import type { IconLayerGenerator } from "@/layer-generators/IconLayerGenerator";
 import type { MjolnirEvent } from "mjolnir.js";
 
 

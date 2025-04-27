@@ -83,16 +83,13 @@ const computedSarIcon = computed<string>(() => {
     switch (props.object.aircraftType) {
         case SarAircraftType.FixedWing:
             aircraft = svgAircraft;
-
             break;
         case SarAircraftType.Helicopter:
             aircraft = svgHelicopter;
-
             break;
     }
 
     const [craft, width, height] = SvgHelper.extractSvgRaw(aircraft);
-    console.log(width, height);
     const svg = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">` +
         `<g transform='rotate(${360 - angle} 100 100)'>` +
         `<g transform='translate(${(200 - width) / 2.0}, ${(200 - height) /2.0})'>${craft}</g>` +

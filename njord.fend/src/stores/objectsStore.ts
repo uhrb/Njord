@@ -8,14 +8,20 @@ export const objectsStore = reactive<{
 }>({
     objects: new Map<MaritimeObjectType, MaritimeObjectState[]>([
         [MaritimeObjectType.Vessel, []],
-        [MaritimeObjectType.SarAircraft, []]
+        [MaritimeObjectType.SarAircraft, []],
+        [MaritimeObjectType.Station, []],
+        [MaritimeObjectType.AtoN, []]
     ]),
     objectsAmount: new Map<MaritimeObjectType, number>([
         [MaritimeObjectType.Vessel, 0],
-        [MaritimeObjectType.SarAircraft, 0]
+        [MaritimeObjectType.SarAircraft, 0],
+        [MaritimeObjectType.Station, 0],
+        [MaritimeObjectType.AtoN, 0]
     ]),
     objectsVisibility: new Map<MaritimeObjectType, boolean>([
         [MaritimeObjectType.Vessel, true],
-        [MaritimeObjectType.SarAircraft, true]
+        [MaritimeObjectType.SarAircraft, true],
+        [MaritimeObjectType.Station, true],
+        [MaritimeObjectType.AtoN, true]
     ]),
 })
