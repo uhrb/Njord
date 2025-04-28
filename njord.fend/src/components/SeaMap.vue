@@ -29,13 +29,17 @@ import { objectsStore } from '@/stores/objectsStore';
 import MaritimeCard from '@/components/MaritimeCard.vue';
 import { StationsLayerGenerator } from '@/layer-generators/StationsLayerGenerator';
 import { AtonSLayerGenerator } from '@/layer-generators/AtoNsLayerGenerator';
+import { MaritimeDevicesLayerGenerator } from '@/layer-generators/MaritimeDevicesLayerGenerator';
+import { SartLayerGenerator } from '@/layer-generators/SartLayerGenerator';
 
 
 const generators = new Map<MaritimeObjectType, IconLayerGenerator<MaritimeObjectState>>([
   [MaritimeObjectType.Vessel, new VesselsLayerGenerator()],
   [MaritimeObjectType.SarAircraft, new SarAircraftsLayerGenerator()],
   [MaritimeObjectType.Station, new StationsLayerGenerator()],
-  [MaritimeObjectType.AtoN, new AtonSLayerGenerator()]
+  [MaritimeObjectType.AtoN, new AtonSLayerGenerator()],
+  [MaritimeObjectType.Device, new MaritimeDevicesLayerGenerator()],
+  [MaritimeObjectType.SART, new SartLayerGenerator()]
 ]);
 
 const mariTimeLayer = new MaritimeLayer(generators, mappingsStore.ShipTypeNameMappings, mappingsStore.NavigationStatusMappings);

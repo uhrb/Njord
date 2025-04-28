@@ -9,6 +9,10 @@
                 v-if="props.object?.objectType == MaritimeObjectType.Station"></StationTitle>
             <AtonTitle :object="<AtoNState>props.object" v-if="props.object?.objectType == MaritimeObjectType.AtoN">
             </AtonTitle>
+            <SartTitle :object="<SARTState>props.object" v-if="props.object?.objectType == MaritimeObjectType.SART">
+            </SartTitle>
+            <DeviceTitle :object="<MaritimeDeviceState>props.object" v-if="props.object?.objectType == MaritimeObjectType.Device">
+            </DeviceTitle>
             <v-fab class="ma-1" variant="text" icon="mdi-close" location="top end" size="small" absolute @click="emits('close')"></v-fab>
         </template>
 
@@ -21,6 +25,10 @@
                 v-if="props.object?.objectType == MaritimeObjectType.Station"></StationSubtitle>
             <AtoNSubtitle :object="<AtoNState>props.object" v-if="props.object?.objectType == MaritimeObjectType.AtoN">
             </AtoNSubtitle>
+            <SartSubtitle :object="<SARTState>props.object" v-if="props.object?.objectType == MaritimeObjectType.SART">
+            </SartSubtitle>
+            <DeviceSubtitle :object="<MaritimeDeviceState>props.object" v-if="props.object?.objectType == MaritimeObjectType.Device">
+            </DeviceSubtitle>
         </template>
 
         <template v-slot:text>
@@ -32,6 +40,10 @@
                 v-if="props.object?.objectType == MaritimeObjectType.Station"></StationText>
             <AtoNText :object="<AtoNState>props.object" v-if="props.object?.objectType == MaritimeObjectType.AtoN">
             </AtoNText>
+            <SartText :object="<SARTState>props.object" v-if="props.object?.objectType == MaritimeObjectType.SART">
+            </SartText>
+            <DeviceText :object="<MaritimeDeviceState>props.object" v-if="props.object?.objectType == MaritimeObjectType.Device">
+            </DeviceText>
         </template>
     </v-card>
 </template>
@@ -54,6 +66,14 @@ import AtonTitle from '@/components/CardParts/AtoN/AtoNTitle.vue';
 import type { AtoNState } from '@/types/AtoNState';
 import AtoNSubtitle from '@/components/CardParts/AtoN/AtoNSubtitle.vue';
 import AtoNText from '@/components/CardParts/AtoN/AtoNText.vue';
+import SartTitle from '@/components/CardParts/SART/SartTitle.vue';
+import type { SARTState } from '@/types/SartState';
+import SartSubtitle from '@/components/CardParts/SART/SartSubtitle.vue';
+import SartText from '@/components/CardParts/SART/SartText.vue';
+import DeviceTitle from '@/components/CardParts/Device/DeviceTitle.vue';
+import type { MaritimeDeviceState } from '@/types/MaritimeDeviceState';
+import DeviceSubtitle from '@/components/CardParts/Device/DeviceSubtitle.vue';
+import DeviceText from '@/components/CardParts/Device/DeviceText.vue';
 
 const props = defineProps<{
     object: MaritimeObjectState | undefined

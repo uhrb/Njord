@@ -1,6 +1,8 @@
 export enum MaritimeObjectType {
     Vessel = "Vessel",
-    SarAircraft = "Sar Aircraft",
+    SarAircraft = "SAR Aircraft",
     Station = "Station",
     AtoN = "AtoN",
+    Device = "Device",
+    SART = "SART"
 }

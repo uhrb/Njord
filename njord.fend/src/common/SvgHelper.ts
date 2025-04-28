@@ -6,7 +6,13 @@ import stoppedStatus from "@/assets/stopped-status.svg";
 import type { AtoNState } from "@/types/AtoNState";
 import type { VesselState } from "@/types/VesselState";
 import type { LatLngBounds } from "leaflet";
+import { MaritimeDeviceType } from "@/types/MaritimeDeviceType";
 
+import svgHandheldVHF from "@/assets/handheld-vhf.svg";
+import svgManOverBoard from "@/assets/man-over-board.svg";
+import svgSart from "@/assets/sart.svg";
+import svgEmergency from "@/assets/emergency.svg";
+import { SARTType } from "@/types/SartType";
 
 export interface CombineOptions {
     finalWidth: any;
@@ -67,6 +73,48 @@ class SvgHelperImplementation {
             anchorY: 24,
             anchorX: 24,
             mask: false,
+        };
+    }
+
+    public getDeviceIcon(deviceType: MaritimeDeviceType) {
+        let url = svgHandheldVHF;
+        switch (deviceType) {
+            case MaritimeDeviceType.EmergencyPositionIdentificationSystem:
+                url = svgEmergency;
+                break;
+            case MaritimeDeviceType.HandheldVHF:
+                url = svgHandheldVHF;
+                break;
+        }
+
+        return {
+            url: url,
+            width: 48,
+            height: 48,
+            anchorY: 24,
+            anchorX: 24,
+            mask: true,
+        };
+    }
+
+    public getSartIcon(sartType: SARTType) {
+        let url = svgSart;
+        switch (sartType) {
+            case SARTType.SearchAndRescueTransmitter:
+                url = svgSart;
+                break;
+            case SARTType.ManOverBoard:
+                url = svgManOverBoard;
+                break;
+        }
+
+        return {
+            url: url,
+            width: 48,
+            height: 48,
+            anchorY: 24,
+            anchorX: 24,
+            mask: true,
         };
     }
 

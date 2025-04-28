@@ -12,15 +12,20 @@ import { StationType } from "@/types/StationType";
 import type { StationState } from "@/types/BaseStationState";
 import { AtoNType } from "@/types/AtoNType";
 import type { AtoNState } from "@/types/AtoNState";
+import { MaritimeDeviceType } from "@/types/MaritimeDeviceType";
+import { SARTType } from "@/types/SartType";
+import type { SARTState } from "@/types/SartState";
 
 export class DataStream {
 
     _connection: HubConnection;
-    _dataMap : Map<MaritimeObjectType, Map<string, MaritimeObjectState>> = new Map([
+    _dataMap: Map<MaritimeObjectType, Map<string, MaritimeObjectState>> = new Map([
         [MaritimeObjectType.Vessel, new Map()],
         [MaritimeObjectType.SarAircraft, new Map()],
         [MaritimeObjectType.Station, new Map()],
-        [MaritimeObjectType.AtoN, new Map()]
+        [MaritimeObjectType.AtoN, new Map()],
+        [MaritimeObjectType.Device, new Map()],
+        [MaritimeObjectType.SART, new Map()]
     ]);
 
     constructor() {
@@ -68,6 +73,18 @@ export class DataStream {
                     break;
                 case "VirtualAidsToNavigation":
                     this._parseAtoN(AtoNType.Virtual, objectId, objectState);
+                case "EmergencyPositionIdentificationSystem":
+                    this._parseMaritimeDevice(MaritimeDeviceType.EmergencyPositionIdentificationSystem, objectId, objectState);
+                    break;
+                case "HandheldVHF":
+                    this._parseMaritimeDevice(MaritimeDeviceType.HandheldVHF, objectId, objectState);
+                    break;
+                case "ManOverBoard":
+                    this._parseSart(SARTType.ManOverBoard, objectId, objectState);
+                    break;
+                case "SearchAndRescueTransmitter":
+                    this._parseSart(SARTType.SearchAndRescueTransmitter, objectId, objectState);
+                    break;
                 default:
                     break;
             }
@@ -95,22 +112,26 @@ export class DataStream {
                 Object.assign(mappingsStore.AidsToNavigationRACONStatusMappings, result);
             });
             await this._connection.invoke("CommandSendAllStatesByTypes", [
-                "Vessel", 
-                "SearchAndRescueFixedWingAircraft", 
-                "SearchAndRescueHelicopter", 
-                "BaseStation", 
-                "CoastStation", 
+                "Vessel",
+                "SearchAndRescueFixedWingAircraft",
+                "SearchAndRescueHelicopter",
+                "BaseStation",
+                "CoastStation",
                 "PilotStation",
                 "PortStation",
                 "RepeaterStation",
                 "MobileAidsToNavigation",
                 "PhysicalAidsToNavigation",
-                "VirtualAidsToNavigation"
+                "VirtualAidsToNavigation",
+                "EmergencyPositionIdentificationSystem",
+                "HandheldVHF",
+                "ManOverBoard",
+                "SearchAndRescueTransmitter"
             ]);
         });
 
         useIntervalFn(() => {
-            for(const kv of this._dataMap) {
+            for (const kv of this._dataMap) {
                 const key = kv[0];
                 const val = kv[1];
                 objectsStore.objects.set(key, val.values());
@@ -118,9 +139,31 @@ export class DataStream {
             }
         }, 1000)
     }
+    
+    private _parseSart(sartType: SARTType, objectId: string, objectState: any) {
+        let sart: SARTState = {
+            sartType: sartType,
+            mmsi: objectId,
+            objectType: MaritimeObjectType.SART,
+            ...objectState
+        }
+
+        this._dataMap.get(MaritimeObjectType.SART)?.set(objectId, sart);
+    }
+
+    private _parseMaritimeDevice(deviceType: MaritimeDeviceType, objectId: string, objectState: any) {
+        let dev: MaritimeObjectState = {
+            mmsi: objectId,
+            deviceType: deviceType,
+            objectType: MaritimeObjectType.Device,
+            ...objectState
+        };
+
+        this._dataMap.get(MaritimeObjectType.Device)?.set(objectId, dev);
+    }
 
     private _parseVesselUpdate(objectId: string, objectState: any) {
-        var vsl: VesselState = {
+        let vsl: VesselState = {
             mmsi: objectId,
             objectType: MaritimeObjectType.Vessel,
             ...objectState,
@@ -129,7 +172,7 @@ export class DataStream {
     }
 
     private _parseSar(objectType: SarAircraftType, objectId: string, objectState: any) {
-        var sar : SarAircraftState = {
+        let sar: SarAircraftState = {
             mmsi: objectId,
             objectType: MaritimeObjectType.SarAircraft,
             aircraftType: objectType,
@@ -139,17 +182,17 @@ export class DataStream {
     }
 
     private _parseStation(baseStationType: StationType, objectId: string, objectState: any) {
-        var station: StationState = {
+        let station: StationState = {
             mmsi: objectId,
             objectType: MaritimeObjectType.Station,
             baseStationType: baseStationType,
-            ... objectState
+            ...objectState
         }
         this._dataMap.get(MaritimeObjectType.Station)?.set(objectId, station);
     }
 
     private _parseAtoN(atonType: AtoNType, objectId: string, objectState: any) {
-        var aton: AtoNState = {
+        let aton: AtoNState = {
             mmsi: objectId,
             objectType: MaritimeObjectType.AtoN,
             atonType: atonType,
